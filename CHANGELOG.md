@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 — 2026-11-01
+
+- Hover card in the palette: a rendered preview of what the node makes, a one-line description and its ports (`scripts/gen_node_previews.py`).
+
 ## 0.1.0 — 2026-11-01
 
 First public version.

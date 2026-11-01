@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "solidnode"
-version = "0.1.0"
+version = "0.1.1"
 description = "Visual, node-based modelling for SolidCraft — a Grasshopper-style editor with live preview, data trees and fabrication nodes for laser cutting and 3D printing."
 readme = "README.md"
 license = "MIT"
@@ -42,7 +42,7 @@ Issues = "https://github.com/malandereideen/solidnode/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-solidnode = ["examples/*.json"]
+solidnode = ["examples/*.json", "previews/*.png"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

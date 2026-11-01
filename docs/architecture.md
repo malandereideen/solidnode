@@ -54,4 +54,4 @@ class MyNode(SerpNode):
         return ...                            # one value per output
 ```
 
-Add it to `NODE_CLASSES`, give it a symbol in `SYMBOLS`, then run `scripts/gen_node_docs.py` and add its English name there.
+Add it to `NODE_CLASSES`, give it a symbol in `SYMBOLS`, add a German one-liner to `DE` in `nodeinfo.py`, then run `scripts/gen_node_docs.py` (add its English name there) and `scripts/gen_node_previews.py` (wire a demo input into `DEMO` if the node needs one).

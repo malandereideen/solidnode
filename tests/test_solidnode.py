@@ -186,3 +186,13 @@ def test_offset_surfaces_converted_for_solidcraft(panel):
     assert not any(BRepAdaptor_Surface(f).GetType() == GeomAbs_OffsetSurface
                    for f in faces_of(fixed))
     assert BRepCheck_Analyzer(fixed).IsValid()
+
+
+def test_every_node_has_a_hover_card(panel):
+    from solidnode import nodeinfo
+    missing = [c.NODE_NAME for c in panel.NODE_CLASSES
+               if c.NODE_NAME not in nodeinfo.DE]
+    assert not missing
+    with_picture = [c for c in panel.NODE_CLASSES if nodeinfo.preview_file(c)]
+    assert len(with_picture) >= 60
+    assert "<img" in nodeinfo.card(with_picture[0], "x")

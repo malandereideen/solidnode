@@ -1381,7 +1381,7 @@ def make_core():
         ZufallNode, ZufallspunkteNode, VoronoiNode, ExportNode,
     ]
 
-    from . import fabrication, polyhedra
+    from . import fabrication, nodeinfo, polyhedra
     NODE_CLASSES += fabrication.make_nodes(SerpNode, Tree, geo, is_shape,
                                            parse)
     NODE_CLASSES += polyhedra.make_nodes(SerpNode)
@@ -1525,6 +1525,9 @@ def make_core():
             super().__init__(parent)
             self.setMinimumWidth(130)
             self.setMaximumWidth(260)
+            # dunkle Hover-Karte, damit das Vorschaubild trägt
+            self.setStyleSheet("QToolTip { background: #1d1f23; color: #ddd;"
+                               " border: 1px solid #3a3d42; padding: 6px; }")
             lay = QtWidgets.QVBoxLayout(self)
             lay.setContentsMargins(4, 4, 4, 4)
             lay.setSpacing(2)
@@ -1557,7 +1560,7 @@ def make_core():
                     it = QtWidgets.QListWidgetItem(node_icon(cls, color), "")
                     it.setData(QtCore.Qt.ItemDataRole.UserRole,
                                f"{cls.__identifier__}.{cls.__name__}")
-                    it.setToolTip(f"<b>{cls.NODE_NAME}</b><br>{label}")
+                    it.setToolTip(nodeinfo.card(cls, label))
                     it.setSizeHint(QtCore.QSize(30, 30))
                     grid.addItem(it)
                 col.addWidget(head)

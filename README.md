@@ -113,9 +113,11 @@ More detail: [docs/solidcraft.md](docs/solidcraft.md).
 4. **An SolidCraft senden** — the parts appear in your design as component *Nodes Vorschau*. Tick **live in SolidCraft** to keep it updated.
 5. **Bake** puts a permanent copy into the design.
 
+![Hovering a palette tile shows a picture of what the node makes, a one-line description and its ports](docs/img/hover_card.png)
+
 ![Close-up of the laser box graph: sliders feed the box node, then kerf, nesting and SVG export](docs/img/nodes_detail.png)
 
-Build your own: click a tile in the palette on the left (or drag it into the canvas), connect outputs to inputs, type values into the small fields next to inputs. **Tab** in the canvas searches nodes. Red node = error, yellow = missing input — hover for the message.
+Build your own: hover a tile in the palette on the left to see what the node makes, click it (or drag it into the canvas), connect outputs to inputs, type values into the small fields next to inputs. **Tab** in the canvas searches nodes. Red node = error, yellow = missing input — hover for the message.
 
 ### Pick geometry from SolidCraft
 
