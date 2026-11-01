@@ -60,13 +60,14 @@ def doctor():
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
-    if argv and argv[0] in ("install-serpentine-plugin", "doctor",
+    if argv and argv[0] in ("install-serpentine-plugin", "doctor", "update",
                             "-h", "--help", "--version"):
         p = argparse.ArgumentParser(prog="solidnode",
                                     description="Node-basiertes Modellieren "
                                     "für SolidCraft.")
         p.add_argument("befehl", nargs="?",
-                       choices=["install-serpentine-plugin", "doctor"])
+                       choices=["install-serpentine-plugin", "doctor",
+                                "update"])
         p.add_argument("--version", action="store_true")
         a = p.parse_args(argv)
         if a.version:
@@ -75,6 +76,9 @@ def main(argv=None):
             return 0
         if a.befehl == "doctor":
             sys.exit(doctor())
+        if a.befehl == "update":
+            from . import update
+            sys.exit(update.run_cli())
         if a.befehl == "install-serpentine-plugin":
             install_serpentine_plugin()
         return 0

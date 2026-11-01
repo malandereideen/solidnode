@@ -196,3 +196,19 @@ def test_every_node_has_a_hover_card(panel):
     with_picture = [c for c in panel.NODE_CLASSES if nodeinfo.preview_file(c)]
     assert len(with_picture) >= 60
     assert "<img" in nodeinfo.card(with_picture[0], "x")
+
+
+def test_update_version_compare_and_plan(monkeypatch, tmp_path):
+    from solidnode import update
+    assert update.newer("0.1.10", "0.1.9")
+    assert not update.newer("0.1.1", "0.1.1")
+    assert not update.newer("0.1.0", "0.2")
+    assert not update.newer("kaputt", "0.1")
+    f = tmp_path / "init.py"
+    f.write_text('__version__ = "9.9.9"\n')
+    monkeypatch.setenv("SOLIDNODE_UPDATE_URL", f.as_uri())
+    assert update.latest() == "9.9.9"
+    monkeypatch.setenv("SOLIDNODE_NO_UPDATE_CHECK", "1")
+    assert update.latest() is None
+    what, prog, args, _cwd = update.plan()
+    assert prog and args

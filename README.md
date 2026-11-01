@@ -70,7 +70,9 @@ solidnode doctor
 solidnode
 ```
 
-Update later with `uv tool upgrade solidnode`, remove with `uv tool uninstall solidnode`.
+**Updates:** at start SolidNode checks GitHub. If there is a newer version, an orange **Update auf x.y.z** button appears in the toolbar — one click installs it and offers to restart (your open graph comes along). From the terminal: `solidnode update`. Set `SOLIDNODE_NO_UPDATE_CHECK=1` to switch the check off. (Versions before 0.1.2 have no button yet: run the install command from step 2 again with `--force`.)
+
+Remove with `uv tool uninstall solidnode`.
 
 <details>
 <summary>Without uv (pip / pipx)</summary>

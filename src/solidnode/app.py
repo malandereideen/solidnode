@@ -22,7 +22,7 @@ os.environ.setdefault("QT_API", "pyside6")
 import numpy as np                                        # noqa: E402
 from PySide6 import QtCore, QtGui, QtWidgets              # noqa: E402
 
-from . import hosts                                       # noqa: E402
+from . import hosts, update                               # noqa: E402
 
 
 
@@ -223,6 +223,19 @@ class Main(QtWidgets.QMainWindow):
         bar.addWidget(spacer)
         self.msg = QtWidgets.QLabel("")
         bar.addWidget(self.msg)
+        self.update_btn = QtWidgets.QToolButton()
+        self.update_btn.setStyleSheet(
+            "QToolButton { background: #c9832c; color: white; border-radius: 3px;"
+            " padding: 2px 8px; font-weight: bold; }"
+            "QToolButton:disabled { background: #6b5536; color: #ddd; }")
+        self.update_btn.clicked.connect(self.run_update)
+        self.update_act = bar.addWidget(self.update_btn)
+        self.update_act.setVisible(False)
+        self.remote_version = None
+        self.update_proc = None
+        self.checker = UpdateCheck(self)
+        self.checker.found.connect(self.offer_update)
+        self.checker.start()
 
         self.serp_pid = None
         self.sc_ok = False
@@ -293,12 +306,91 @@ class Main(QtWidgets.QMainWindow):
         self.message("SolidCraft: sende …")
         self.sc.send()
 
+    # -- Update
+
+    def offer_update(self, remote):
+        self.remote_version = remote
+        self.update_btn.setText(f"Update auf {remote}")
+        self.update_btn.setToolTip(
+            f"Installiert ist {update.__version__}, auf GitHub gibt es "
+            f"{remote}.\nKlick installiert das Update und startet neu.")
+        self.update_act.setVisible(True)
+
+    def run_update(self):
+        what, prog, args, cwd = update.plan()
+        self.update_btn.setEnabled(False)
+        self.update_btn.setText("Update läuft …")
+        self.message(f"Update per {what} …")
+        proc = self.update_proc = QtCore.QProcess(self)
+        proc.setProcessChannelMode(
+            QtCore.QProcess.ProcessChannelMode.MergedChannels)
+        if cwd:
+            proc.setWorkingDirectory(cwd)
+        proc.finished.connect(self._update_done)
+        proc.errorOccurred.connect(lambda _e: self._update_done(-1, None))
+        proc.start(prog, args)
+
+    def _update_done(self, code, _status):
+        proc, self.update_proc = self.update_proc, None
+        if proc is None:                      # errorOccurred und finished
+            return
+        out = bytes(proc.readAll()).decode("utf-8", "replace").strip()
+        if code != 0:
+            self.update_btn.setEnabled(True)
+            self.update_btn.setText(f"Update auf {self.remote_version}")
+            self.message("Update fehlgeschlagen")
+            box = QtWidgets.QMessageBox(self)
+            box.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+            box.setWindowTitle("Update fehlgeschlagen")
+            box.setText("Das Update ließ sich nicht installieren.")
+            box.setDetailedText(out[-4000:] or proc.errorString())
+            box.exec()
+            return
+        self.update_btn.setText("Update installiert")
+        self.message(f"Update auf {self.remote_version} installiert")
+        ask = QtWidgets.QMessageBox.question(
+            self, "Update installiert",
+            f"SolidNode {self.remote_version} ist installiert.\n"
+            "Jetzt neu starten? Der offene Graph wird mitgenommen.")
+        if ask == QtWidgets.QMessageBox.StandardButton.Yes:
+            self.restart()
+
+    def restart(self):
+        os.makedirs(hosts.STATE, exist_ok=True)
+        keep = os.path.join(hosts.STATE, "vor_update.json")
+        self.panel.graph.save_session(keep)
+        prog, args = update.restart_command()
+        clean, skip = [], False
+        for a in args:                        # altes --laden ersetzen
+            if skip:
+                skip = False
+            elif a == "--laden":
+                skip = True
+            else:
+                clean.append(a)
+        QtCore.QProcess.startDetached(prog, [*clean, "--laden", keep])
+        QtWidgets.QApplication.quit()
+
     def message(self, text):
         self.msg.setText(text + "  ")
 
     def closeEvent(self, ev):
         self.serp.clear()
         super().closeEvent(ev)
+
+
+class UpdateCheck(QtCore.QObject):
+    """Fragt GitHub im Hintergrund nach der aktuellen Version."""
+    found = QtCore.Signal(str)
+
+    def start(self):
+        import threading
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def _run(self):
+        remote = update.latest()
+        if remote and update.newer(remote):
+            self.found.emit(remote)           # Signal: landet im Qt-Thread
 
 
 def parse_args(argv):

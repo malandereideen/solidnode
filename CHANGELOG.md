@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 — 2026-11-01
+
+- Update check at start: if GitHub has a newer version, a toolbar button installs it (uv tool, pip, or `git pull` for a clone) and restarts with the open graph. Also `solidnode update`; `SOLIDNODE_NO_UPDATE_CHECK=1` turns it off.
+
 ## 0.1.1 — 2026-11-01
 
 - Hover card in the palette: a rendered preview of what the node makes, a one-line description and its ports (`scripts/gen_node_previews.py`).

@@ -6,6 +6,8 @@
 
 ![Links SolidNode, rechts das Ergebnis als Körper in SolidCraft](docs/img/workflow.png)
 
+Beim Start prüft SolidNode, ob es auf GitHub eine neuere Version gibt. Wenn ja, erscheint oben ein oranger Knopf **Update auf x.y.z**: ein Klick installiert es und startet neu, der offene Graph kommt mit. Im Terminal geht dasselbe mit `solidnode update`.
+
 Die ausführliche Anleitung steht auf Englisch in der [README](README.md). Die Oberfläche der App ist deutsch.
 
 ## Installieren

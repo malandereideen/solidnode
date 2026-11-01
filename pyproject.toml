@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "solidnode"
-version = "0.1.1"
+version = "0.1.2"
 description = "Visual, node-based modelling for SolidCraft — a Grasshopper-style editor with live preview, data trees and fabrication nodes for laser cutting and 3D printing."
 readme = "README.md"
 license = "MIT"
