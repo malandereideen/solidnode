@@ -1,0 +1,1072 @@
+{
+ "graph": {
+  "layout_direction": 0,
+  "acyclic": true,
+  "pipe_collision": false,
+  "pipe_slicing": true,
+  "pipe_style": 1,
+  "accept_connection_types": "{}",
+  "reject_connection_types": "{}"
+ },
+ "nodes": {
+  "0x17de959d0": {
+   "type_": "serp.Parameter.FolgeNode",
+   "icon": null,
+   "name": "i (72)",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 269.03125,
+   "height": 172.95000000000002,
+   "pos": [
+    0.0,
+    0.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_start": "0",
+    "in_schritt": "1",
+    "in_anzahl": "72"
+   }
+  },
+  "0x17df29a60": {
+   "type_": "serp.Parameter.BereichNode",
+   "icon": null,
+   "name": "t (Ebenen)",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 246.265625,
+   "height": 172.95000000000002,
+   "pos": [
+    0.0,
+    165.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_von": "0",
+    "in_bis": "1",
+    "in_teile": "6"
+   }
+  },
+  "0x104d779b0": {
+   "type_": "serp.Baum.AufpfropfenNode",
+   "icon": null,
+   "name": "t aufpfropfen",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 160,
+   "height": 60,
+   "pos": [
+    273.0,
+    165.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {}
+  },
+  "0x17e4d1fd0": {
+   "type_": "serp.Parameter.ZahlNode",
+   "icon": null,
+   "name": "Wellen",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 368.03125,
+   "height": 209.70000000000002,
+   "pos": [
+    0.0,
+    330.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "wert": 7.0,
+    "min": "0",
+    "max": "12",
+    "dezimalen": "0"
+   }
+  },
+  "0x17e4d02f0": {
+   "type_": "serp.Parameter.ZahlNode",
+   "icon": null,
+   "name": "Amplitude",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 388.34375,
+   "height": 209.70000000000002,
+   "pos": [
+    0.0,
+    467.50000000000006
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "wert": 5.0,
+    "min": "0",
+    "max": "15",
+    "dezimalen": "1"
+   }
+  },
+  "0x17e4d2120": {
+   "type_": "serp.Parameter.ZahlNode",
+   "icon": null,
+   "name": "H\u00f6he",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 359.75,
+   "height": 209.70000000000002,
+   "pos": [
+    0.0,
+    605.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "wert": 120.0,
+    "min": "40",
+    "max": "250",
+    "dezimalen": "0"
+   }
+  },
+  "0x17e4d31d0": {
+   "type_": "serp.Parameter.ZahlNode",
+   "icon": null,
+   "name": "Bauch",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 365.328125,
+   "height": 209.70000000000002,
+   "pos": [
+    0.0,
+    742.5000000000001
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "wert": 0.35,
+    "min": "0",
+    "max": "1",
+    "dezimalen": "2"
+   }
+  },
+  "0x17e4d3650": {
+   "type_": "serp.Parameter.ZahlNode",
+   "icon": null,
+   "name": "Verdrehung",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 396.390625,
+   "height": 209.70000000000002,
+   "pos": [
+    0.0,
+    880.0000000000001
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "wert": 60.0,
+    "min": "-180",
+    "max": "180",
+    "dezimalen": "0"
+   }
+  },
+  "0x17e4d38f0": {
+   "type_": "serp.Mathe.FunktionNode",
+   "icon": null,
+   "name": "Radius r(i)",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 294.21875,
+   "height": 314.7,
+   "pos": [
+    546.0,
+    0.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_x": "0",
+    "in_y": "0",
+    "in_z": "0",
+    "in_a": "0",
+    "in_b": "0",
+    "formel": "35+a*cos(b*x*2*pi/72)"
+   }
+  },
+  "0x17e55de80": {
+   "type_": "serp.Mathe.FunktionNode",
+   "icon": null,
+   "name": "Skala s(t)",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 294.21875,
+   "height": 314.7,
+   "pos": [
+    546.0,
+    220.00000000000003
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_x": "0",
+    "in_y": "0",
+    "in_z": "0",
+    "in_a": "0",
+    "in_b": "0",
+    "formel": "1+a*sin(pi*x*1.2)"
+   }
+  },
+  "0x17e55ea80": {
+   "type_": "serp.Mathe.FunktionNode",
+   "icon": null,
+   "name": "Winkel \u03c6(i,t)",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 294.21875,
+   "height": 314.7,
+   "pos": [
+    546.0,
+    440.00000000000006
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_x": "0",
+    "in_y": "0",
+    "in_z": "0",
+    "in_a": "0",
+    "in_b": "0",
+    "formel": "x*2*pi/72+radians(a*y)"
+   }
+  },
+  "0x17e560d70": {
+   "type_": "serp.Mathe.FunktionNode",
+   "icon": null,
+   "name": "H\u00f6he z(t)",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 294.21875,
+   "height": 314.7,
+   "pos": [
+    546.0,
+    660.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_x": "0",
+    "in_y": "0",
+    "in_z": "0",
+    "in_a": "0",
+    "in_b": "0",
+    "formel": "x*a"
+   }
+  },
+  "0x17e5617c0": {
+   "type_": "serp.Mathe.FunktionNode",
+   "icon": null,
+   "name": "X",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 294.21875,
+   "height": 314.7,
+   "pos": [
+    858.0,
+    110.00000000000001
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_x": "0",
+    "in_y": "0",
+    "in_z": "0",
+    "in_a": "0",
+    "in_b": "0",
+    "formel": "x*y*cos(z)"
+   }
+  },
+  "0x17e562150": {
+   "type_": "serp.Mathe.FunktionNode",
+   "icon": null,
+   "name": "Y",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 294.21875,
+   "height": 314.7,
+   "pos": [
+    858.0,
+    357.50000000000006
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_x": "0",
+    "in_y": "0",
+    "in_z": "0",
+    "in_a": "0",
+    "in_b": "0",
+    "formel": "x*y*sin(z)"
+   }
+  },
+  "0x17de9ab10": {
+   "type_": "serp.Parameter.PunktNode",
+   "icon": null,
+   "name": "Punkte",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 259.5625,
+   "height": 172.95000000000002,
+   "pos": [
+    1170.0,
+    275.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_x": "0",
+    "in_y": "0",
+    "in_z": "0"
+   }
+  },
+  "0x17e563680": {
+   "type_": "serp.Kurven.InterpKurveNode",
+   "icon": null,
+   "name": "Ringe",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 256.34375,
+   "height": 64.80000000000001,
+   "pos": [
+    1443.0,
+    275.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "zu": true
+   }
+  },
+  "0x17e5638f0": {
+   "type_": "serp.Baum.GlaettenNode",
+   "icon": null,
+   "name": "gl\u00e4tten",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 160,
+   "height": 60,
+   "pos": [
+    1677.0,
+    275.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {}
+  },
+  "0x17e563ad0": {
+   "type_": "serp.Koerper.LoftNode",
+   "icon": null,
+   "name": "Loft",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 232.6875,
+   "height": 98.4,
+   "pos": [
+    1911.0,
+    275.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "solid": true,
+    "ruled": false
+   }
+  },
+  "0x17e563f20": {
+   "type_": "serp.Koerper.SchaleNode",
+   "icon": null,
+   "name": "Vase",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 282.90625,
+   "height": 112.05,
+   "pos": [
+    2145.0,
+    275.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_wand": "2",
+    "offen": true
+   }
+  },
+  "0x17e5e44a0": {
+   "type_": "serp.Parameter.AnzeigeNode",
+   "icon": null,
+   "name": "Baum der Punkte",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 360.875,
+   "height": 187.65,
+   "pos": [
+    1443.0,
+    495.00000000000006
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "anzeige": ""
+   }
+  }
+ },
+ "connections": [
+  {
+   "out": [
+    "0x17de959d0",
+    "liste"
+   ],
+   "in": [
+    "0x17e4d38f0",
+    "x"
+   ]
+  },
+  {
+   "out": [
+    "0x17de959d0",
+    "liste"
+   ],
+   "in": [
+    "0x17e55ea80",
+    "x"
+   ]
+  },
+  {
+   "out": [
+    "0x17df29a60",
+    "liste"
+   ],
+   "in": [
+    "0x104d779b0",
+    "daten"
+   ]
+  },
+  {
+   "out": [
+    "0x104d779b0",
+    "daten"
+   ],
+   "in": [
+    "0x17e55de80",
+    "x"
+   ]
+  },
+  {
+   "out": [
+    "0x104d779b0",
+    "daten"
+   ],
+   "in": [
+    "0x17e55ea80",
+    "y"
+   ]
+  },
+  {
+   "out": [
+    "0x104d779b0",
+    "daten"
+   ],
+   "in": [
+    "0x17e560d70",
+    "x"
+   ]
+  },
+  {
+   "out": [
+    "0x17e4d1fd0",
+    "N"
+   ],
+   "in": [
+    "0x17e4d38f0",
+    "b"
+   ]
+  },
+  {
+   "out": [
+    "0x17e4d02f0",
+    "N"
+   ],
+   "in": [
+    "0x17e4d38f0",
+    "a"
+   ]
+  },
+  {
+   "out": [
+    "0x17e4d2120",
+    "N"
+   ],
+   "in": [
+    "0x17e560d70",
+    "a"
+   ]
+  },
+  {
+   "out": [
+    "0x17e4d31d0",
+    "N"
+   ],
+   "in": [
+    "0x17e55de80",
+    "a"
+   ]
+  },
+  {
+   "out": [
+    "0x17e4d3650",
+    "N"
+   ],
+   "in": [
+    "0x17e55ea80",
+    "a"
+   ]
+  },
+  {
+   "out": [
+    "0x17e4d38f0",
+    "ergebnis"
+   ],
+   "in": [
+    "0x17e5617c0",
+    "x"
+   ]
+  },
+  {
+   "out": [
+    "0x17e4d38f0",
+    "ergebnis"
+   ],
+   "in": [
+    "0x17e562150",
+    "x"
+   ]
+  },
+  {
+   "out": [
+    "0x17e55de80",
+    "ergebnis"
+   ],
+   "in": [
+    "0x17e5617c0",
+    "y"
+   ]
+  },
+  {
+   "out": [
+    "0x17e55de80",
+    "ergebnis"
+   ],
+   "in": [
+    "0x17e562150",
+    "y"
+   ]
+  },
+  {
+   "out": [
+    "0x17e55ea80",
+    "ergebnis"
+   ],
+   "in": [
+    "0x17e5617c0",
+    "z"
+   ]
+  },
+  {
+   "out": [
+    "0x17e55ea80",
+    "ergebnis"
+   ],
+   "in": [
+    "0x17e562150",
+    "z"
+   ]
+  },
+  {
+   "out": [
+    "0x17e560d70",
+    "ergebnis"
+   ],
+   "in": [
+    "0x17de9ab10",
+    "z"
+   ]
+  },
+  {
+   "out": [
+    "0x17e5617c0",
+    "ergebnis"
+   ],
+   "in": [
+    "0x17de9ab10",
+    "x"
+   ]
+  },
+  {
+   "out": [
+    "0x17e562150",
+    "ergebnis"
+   ],
+   "in": [
+    "0x17de9ab10",
+    "y"
+   ]
+  },
+  {
+   "out": [
+    "0x17de9ab10",
+    "punkt"
+   ],
+   "in": [
+    "0x17e563680",
+    "punkte"
+   ]
+  },
+  {
+   "out": [
+    "0x17de9ab10",
+    "punkt"
+   ],
+   "in": [
+    "0x17e5e44a0",
+    "wert"
+   ]
+  },
+  {
+   "out": [
+    "0x17e563680",
+    "kurve"
+   ],
+   "in": [
+    "0x17e5638f0",
+    "daten"
+   ]
+  },
+  {
+   "out": [
+    "0x17e5638f0",
+    "daten"
+   ],
+   "in": [
+    "0x17e563ad0",
+    "profile"
+   ]
+  },
+  {
+   "out": [
+    "0x17e563ad0",
+    "form"
+   ],
+   "in": [
+    "0x17e563f20",
+    "koerper"
+   ]
+  }
+ ]
+}

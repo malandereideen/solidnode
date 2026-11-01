@@ -1,0 +1,353 @@
+{
+ "graph": {
+  "layout_direction": 0,
+  "acyclic": true,
+  "pipe_collision": false,
+  "pipe_slicing": true,
+  "pipe_style": 1,
+  "accept_connection_types": "{}",
+  "reject_connection_types": "{}"
+ },
+ "nodes": {
+  "0x14d5fcc20": {
+   "type_": "serp.Koerper.BoxNode",
+   "icon": null,
+   "name": "Block",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 247.96875,
+   "height": 220.20000000000002,
+   "pos": [
+    0.0,
+    0.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_ecke": "0 0 0",
+    "in_x": "60",
+    "in_y": "40",
+    "in_z": "20"
+   }
+  },
+  "0x14d75e0f0": {
+   "type_": "serp.Druck.GitterNode",
+   "icon": null,
+   "name": "Waben",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 282.90625,
+   "height": 225.45000000000002,
+   "pos": [
+    273.0,
+    0.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_zelle": "10",
+    "in_steg": "1.2",
+    "in_haut": "2.4",
+    "typ": "Waben"
+   }
+  },
+  "0x14d77b9b0": {
+   "type_": "serp.Druck.PraegenNode",
+   "icon": null,
+   "name": "Pr\u00e4gen",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 282.90625,
+   "height": 225.45000000000002,
+   "pos": [
+    546.0,
+    0.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_hoehe": "16",
+    "in_tiefe": "0.8",
+    "text": "MW",
+    "art": "erhaben"
+   }
+  },
+  "0x14d8007d0": {
+   "type_": "serp.Druck.AufBettNode",
+   "icon": null,
+   "name": "Auf Bett",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 298.90625,
+   "height": 117.3,
+   "pos": [
+    819.0,
+    0.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "lage": "so lassen",
+    "mitte": true
+   }
+  },
+  "0x14d801d90": {
+   "type_": "serp.Druck.DruckCheckNode",
+   "icon": null,
+   "name": "Check",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 318.09375,
+   "height": 125.7,
+   "pos": [
+    1092.0,
+    137.5
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "in_winkel": "45",
+    "in_wand": "1.0"
+   }
+  },
+  "0x14d7642f0": {
+   "type_": "serp.Parameter.AnzeigeNode",
+   "icon": null,
+   "name": "Bericht",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 302.875,
+   "height": 187.65,
+   "pos": [
+    1365.0,
+    137.5
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "anzeige": ""
+   }
+  },
+  "0x14d7744d0": {
+   "type_": "serp.Ausgabe.ExportNode",
+   "icon": null,
+   "name": "3MF",
+   "color": [
+    13,
+    18,
+    23,
+    255
+   ],
+   "border_color": [
+    74,
+    84,
+    85,
+    255
+   ],
+   "text_color": [
+    255,
+    255,
+    255,
+    180
+   ],
+   "disabled": false,
+   "selected": false,
+   "visible": true,
+   "width": 311.40625,
+   "height": 112.05,
+   "pos": [
+    1092.0,
+    0.0
+   ],
+   "layout_direction": 0,
+   "port_deletion_allowed": false,
+   "subgraph_session": {},
+   "custom": {
+    "pfad": "~/Desktop/druckteil.3mf",
+    "aktiv": false
+   }
+  }
+ },
+ "connections": [
+  {
+   "out": [
+    "0x14d5fcc20",
+    "form"
+   ],
+   "in": [
+    "0x14d75e0f0",
+    "koerper"
+   ]
+  },
+  {
+   "out": [
+    "0x14d75e0f0",
+    "koerper"
+   ],
+   "in": [
+    "0x14d77b9b0",
+    "koerper"
+   ]
+  },
+  {
+   "out": [
+    "0x14d77b9b0",
+    "koerper"
+   ],
+   "in": [
+    "0x14d8007d0",
+    "koerper"
+   ]
+  },
+  {
+   "out": [
+    "0x14d8007d0",
+    "koerper"
+   ],
+   "in": [
+    "0x14d801d90",
+    "koerper"
+   ]
+  },
+  {
+   "out": [
+    "0x14d8007d0",
+    "koerper"
+   ],
+   "in": [
+    "0x14d7744d0",
+    "geometrie"
+   ]
+  },
+  {
+   "out": [
+    "0x14d801d90",
+    "bericht"
+   ],
+   "in": [
+    "0x14d7642f0",
+    "wert"
+   ]
+  }
+ ]
+}
