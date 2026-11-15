@@ -707,6 +707,25 @@ class Laser(WandMixin, HausMixin, ExtraMixin, BautenMixin):
 
     # -- Elemente: Liste im Design, Neubau an derselben Timeline-Stelle
 
+    def leer(self):
+        """True, wenn das offene Design noch nichts enthält."""
+        d = self.design()
+        return not d.get("timeline") and not d.get("bodies")
+
+    def speichern(self, ordner, name):
+        """Kopie als `<ordner>/<name>.sc`; vorhandene Dateien bleiben
+        unangetastet (dann „name (2).sc“ usw.). Gibt den Pfad zurück."""
+        os.makedirs(ordner, exist_ok=True)
+        name = "".join(ch if ch not in '/\\:*?"<>|' else "-" for ch in name)
+        pfad, i = os.path.join(ordner, name + ".sc"), 2
+        while os.path.exists(pfad):
+            pfad, i = os.path.join(ordner, f"{name} ({i}).sc"), i + 1
+        self.c.tool("save", {"path": pfad})
+        return pfad
+
+    def neues_design(self, name):
+        self.c.tool("new_design", {"name": name})
+
     def _meta(self):
         meta = json.loads(self.c.execute("document.metadata", {}))
         return dict(meta.get("metadata", {}).get(META) or {})

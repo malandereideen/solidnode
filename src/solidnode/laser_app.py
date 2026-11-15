@@ -13,6 +13,7 @@ Reiter:
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 
@@ -33,6 +34,9 @@ from .laser import SCHEMA, WAND_TYPES, Laser, defaults
 from .laser_icons import ICONS
 
 _WAND = "Wandfläche anklicken"
+# Hier landen die Designs, die „In neuem Design“ speichert (je Maßstab eins).
+BAUSAETZE = os.environ.get("SOLIDNODE_BAUSAETZE", os.path.expanduser(
+    "~/Documents/Laserbausätze"))
 # Baukasten: Gruppe → [(Name, Symbol, Typ, Voreinstellung, Hinweis)]
 KATALOG = [
     ("Baukörper", [
@@ -574,11 +578,24 @@ class Palette(QWidget):
         self.teile.setMinimumHeight(90)
         lay.addWidget(self.teile)
         row = QHBoxLayout()
-        self.b_haeuser = self._btn("Als Häuser anlegen", self.do_lod2_haeuser)
-        self.b_masse = self._btn("Maße in „Bauen“", self.do_lod2_masse)
-        for b in (self.b_haeuser, self.b_masse):
+        self.b_haeuser = self._btn("Ins offene Design", self.do_lod2_haeuser)
+        self.b_haeuser.setToolTip("Legt das Gebäude als Haus-Elemente im "
+                                  "gerade offenen SolidCraft-Design an.")
+        self.b_neu_design = self._btn("In neuem Design",
+                                      lambda: self.do_lod2_haeuser(neu=True))
+        self.b_neu_design.setToolTip(
+            "Für einen zweiten Maßstab: speichert das offene Design als "
+            "Kopie in Dokumente/Laserbausätze, öffnet ein leeres Design, "
+            "legt das Gebäude im eingestellten Maßstab an und speichert "
+            "auch das (z. B. „Uenglinger Tor 1-87.sc“).")
+        for b in (self.b_haeuser, self.b_neu_design):
             b.setEnabled(False)
             row.addWidget(b)
+        lay.addLayout(row)
+        row = QHBoxLayout()
+        self.b_masse = self._btn("Nur Maße in „Bauen“", self.do_lod2_masse)
+        self.b_masse.setEnabled(False)
+        row.addWidget(self.b_masse)
         lay.addLayout(row)
         quelle = QLabel("Daten: amtliches 3D-Gebäudemodell LoD2 der Länder "
                         "(dl-de); Ausland: OpenStreetMap. Erster Abruf einer "
@@ -626,8 +643,10 @@ class Palette(QWidget):
         if self.client is None or not self.client.alive():
             args = (["--headless"] if self.headless else
                     ["--connect", f"127.0.0.1:{hosts.SOLIDCRAFT_PORT}"])
+            os.makedirs(BAUSAETZE, exist_ok=True)
             self.client = hosts.McpClient([*args, "--allow-path",
-                                           hosts.UEBERGABE])
+                                           hosts.UEBERGABE, "--allow-path",
+                                           BAUSAETZE])
         return Laser(self.client, self.staerke.value(), self.finger.value())
 
     def run(self, label, fn, refresh=True, silent=False):
@@ -793,16 +812,42 @@ class Palette(QWidget):
         for c in range(5):
             self.teile.resizeColumnToContents(c)
         self.b_haeuser.setEnabled(True)
+        self.b_neu_design.setEnabled(True)
         self.b_masse.setEnabled(True)
 
-    def do_lod2_haeuser(self):
+    def _gebaeude_name(self):
+        b = self._gewaehltes() or {}
+        name = (b.get("addr") or self.adresse.text().strip()
+                or self.lod2["place"]["name"].split(",")[0])
+        return name.strip() or "Gebäude"
+
+    def do_lod2_haeuser(self, neu=False):
         from . import laser_lod2 as L2
         if not getattr(self, "lod2_teile", None):
             return
         els = L2.to_elements(self.lod2_teile, self._massstab())
         b = self._gewaehltes()
+        m = self._massstab()
+        titel = f"{self._gebaeude_name()} 1-{m:g}"
 
         def fn(L):
+            vorher = ""
+            if neu:
+                if not L.leer():
+                    alt = L._meta().get("massstab")
+                    pfad = L.speichern(BAUSAETZE, f"{self._gebaeude_name()}"
+                                       + (f" 1-{alt:g}" if alt else ""))
+                    vorher = f"bisheriges Design gesichert: " \
+                             f"{os.path.basename(pfad)} · "
+                L.neues_design(titel)
+            fertig = bauen(L)
+            if neu:
+                pfad = L.speichern(BAUSAETZE, titel)
+                return (f"{vorher}neues Design {os.path.basename(pfad)} in "
+                        f"Dokumente/Laserbausätze — {fertig}")
+            return fertig
+
+        def bauen(L):
             msgs = []
             for e in els:
                 p = {k: v for k, v in e.items() if k != "quer"}
