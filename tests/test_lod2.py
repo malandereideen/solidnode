@@ -27,3 +27,11 @@ def test_satteldach_masse_und_massstab():
         assert abs(p["traufe"] - 6) < 0.05 and abs(p["neigung"] - 45) < 1
         e = L2.to_elements(parts, 100)[0]
         assert (e["breite"], e["tiefe"], e["hoehe"]) == (120, 80, 60)
+
+
+def test_gesamtmass_und_passender_massstab():
+    parts, _ = L2.analyse(_haus())
+    L, T, H = L2.gesamt(parts, 100)
+    assert abs(L - 120) < 0.5 and abs(T - 80) < 0.5
+    assert abs(H - (60 + 40)) < 0.5                 # First 6 m + 4 m
+    assert L2.passend(parts, 240) == 50             # 12 m → 240 mm

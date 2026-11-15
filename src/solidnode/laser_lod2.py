@@ -22,7 +22,25 @@ LOD2_DIR = os.environ.get("SOLIDNODE_LOD2",
 ROOF = {"1000": "flach", "2100": "pult", "2200": "pult", "3100": "sattel",
         "3200": "walm", "3300": "walm", "3400": "sattel", "3500": "walm",
         "3600": "kegel", "3700": "kegel", "3800": "sattel", "3900": "sattel"}
-MASSSTAEBE = [87, 100, 120, 160, 200, 250, 300, 500]
+MASSSTAEBE = [(22.5, "G"), (32, "Spur 1"), (45, "Spur 0"), (50, ""),
+              (64, "S"), (87, "H0"), (100, ""), (120, "TT"), (160, "N"),
+              (200, ""), (220, "Z"), (250, ""), (300, ""), (500, ""),
+              (1000, "")]
+
+
+def gesamt(parts, massstab):
+    """Gesamtmaße des Gebäudes am Modell (Länge, Tiefe, Höhe in mm)."""
+    k = 1000.0 / massstab
+    return ((max(p["x1"] for p in parts) - min(p["x0"] for p in parts)) * k,
+            (max(p["y1"] for p in parts) - min(p["y0"] for p in parts)) * k,
+            (max(p["top"] for p in parts) - min(p["z0"] for p in parts)) * k)
+
+
+def passend(parts, laengste_mm):
+    """Maßstab, bei dem die längste Gebäudeseite `laengste_mm` lang wird
+    (auf ganze Zahl gerundet)."""
+    g = gesamt(parts, 1000.0)               # 1:1000 → mm = Meter
+    return max(1, round(max(g) * 1000.0 / laengste_mm))
 
 
 def _mods():

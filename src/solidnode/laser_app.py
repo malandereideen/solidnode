@@ -531,19 +531,39 @@ class Palette(QWidget):
         row.addWidget(self.b_lod2)
         lay.addLayout(row)
         row = QHBoxLayout()
-        row.addWidget(QLabel("Maßstab 1:"))
-        self.massstab = QComboBox()
-        self.massstab.setEditable(True)
-        self.massstab.addItems([str(m) for m in MASSSTAEBE])
-        self.massstab.setCurrentText("160")
-        self.massstab.currentTextChanged.connect(self.zeige_teile)
-        row.addWidget(self.massstab)
         row.addWidget(QLabel("Umkreis"))
         self.radius = _field("int", 80, 20, 300, 10)
         self.radius.setSuffix(" m")
         row.addWidget(self.radius)
         row.addStretch(1)
         lay.addLayout(row)
+        row = QHBoxLayout()
+        row.addWidget(QLabel("Maßstab 1:"))
+        self.massstab = QComboBox()
+        self.massstab.setEditable(True)
+        self.massstab.setToolTip("Auswählen oder eigene Zahl eintippen "
+                                 "(z. B. 75). In der Liste steht die "
+                                 "Modellgröße des gewählten Gebäudes.")
+        self.massstab_liste = MASSSTAEBE
+        self._massstab_texte()
+        self.massstab.setCurrentIndex(
+            [m for m, _n in MASSSTAEBE].index(160))
+        self.massstab.currentTextChanged.connect(self.zeige_teile)
+        row.addWidget(self.massstab, 1)
+        lay.addLayout(row)
+        row = QHBoxLayout()
+        row.addWidget(QLabel("oder längste Seite"))
+        self.ziel = _field("mm", 150, 20, 1500, 10)
+        self.ziel.setToolTip("Gewünschte Länge der längsten Gebäudeseite am "
+                             "Modell — der Maßstab wird passend gerechnet.")
+        row.addWidget(self.ziel)
+        b = self._btn("→ Maßstab", self.do_zielgroesse)
+        row.addWidget(b)
+        row.addStretch(1)
+        lay.addLayout(row)
+        self.groesse = QLabel("")
+        self.groesse.setStyleSheet("font-weight: bold;")
+        lay.addWidget(self.groesse)
         self.plan = Lageplan()
         self.plan.gewaehlt.connect(lambda _i: self.zeige_teile())
         lay.addWidget(self.plan, 1)
@@ -695,22 +715,67 @@ class Palette(QWidget):
         return self.lod2["buildings"][self.plan.sel]
 
     def _massstab(self):
+        import re
+        m = re.search(r"\d+(?:[.,]\d+)?",
+                      self.massstab.currentText().replace("1:", "", 1))
         try:
-            return max(1.0, float(self.massstab.currentText()))
+            return max(1.0, float(m.group().replace(",", "."))) if m else 160.0
         except ValueError:
             return 160.0
+
+    def _massstab_texte(self, parts=None):
+        """Listeneinträge „87 · H0 · 120×95×140 mm“ (Größe, wenn ein
+        Gebäude gewählt ist). Die freie Eingabe bleibt erhalten."""
+        import re
+        from . import laser_lod2 as L2
+        aktuell = self.massstab.currentText()
+        self.massstab.blockSignals(True)
+        self.massstab.clear()
+        for m, name in self.massstab_liste:
+            t = f"{m:g}" + (f" · {name}" if name else "")
+            if parts:
+                g = L2.gesamt(parts, m)
+                t += f" · {g[0]:.0f}×{g[1]:.0f}×{g[2]:.0f} mm"
+            self.massstab.addItem(t, m)
+        if aktuell:
+            m = re.match(r"\s*(?:1:)?(\d+(?:[.,]\d+)?)", aktuell)
+            v = m.group(1).replace(",", ".") if m else None
+            idx = next((i for i, (q, _n) in enumerate(self.massstab_liste)
+                        if v is not None and abs(q - float(v)) < 1e-6), -1)
+            if idx >= 0:
+                self.massstab.setCurrentIndex(idx)
+            else:
+                self.massstab.setEditText(aktuell)
+        self.massstab.blockSignals(False)
+
+    def do_zielgroesse(self):
+        from . import laser_lod2 as L2
+        if not getattr(self, "lod2_teile", None):
+            self.say("Erst ein Gebäude suchen und im Plan anklicken.",
+                     error=True)
+            return
+        m = L2.passend(self.lod2_teile, self.ziel.value())
+        self.massstab.setEditText(str(m))      # löst zeige_teile aus
 
     def zeige_teile(self):
         from . import laser_lod2 as L2
         b = self._gewaehltes()
         self.teile.clear()
         self.lod2_teile = []
+        self.groesse.setText("")
         if b is None:
             return
         parts, _ang = L2.analyse(b)
         self.lod2_teile = parts
         if not parts:
             return
+        if getattr(self, "_texte_fuer", None) is not b:
+            self._texte_fuer = b
+            self._massstab_texte(parts)
+        g = L2.gesamt(parts, self._massstab())
+        self.groesse.setText(f"Modell bei 1:{self._massstab():g}: "
+                             f"{g[0]:.0f} × {g[1]:.0f} × {g[2]:.0f} mm "
+                             "(L × T × H)")
         els = L2.to_elements(parts, self._massstab())
         for i, (p, e) in enumerate(zip(parts, els)):
             it = QTreeWidgetItem([
