@@ -174,10 +174,60 @@ def test_gaube_vordach_rundturm(laser):
     assert "Gaube 1" in L.edit(hid, {"hoehe": 70})
     msg, _files = L.export(ordner=str(tmp / "exp"))
     assert "⚠" not in msg, msg
-    flats = [n for n, *_ in [(e,) for e in ("Rundturm 1 Mantel",
+    flats = [n for n, *_ in [(e,) for e in ("Rundturm 1 Mantel Lasche", "Rundturm 1 Mantel",
                                             "Rundturm 1 Kegeldach",
                                             "Rundturm 2 Mantel")]]
     svg = "".join(open(f, encoding="utf-8").read() for f in _files
                   if f.endswith(".svg"))
     for n in flats:
         assert f">{n}<" in svg
+
+
+def test_restliche_bauten(laser):
+    from solidnode.laser import _common, _vertices, _volume
+    L, c, tmp = laser
+    eid = lambda n: next(e["id"] for e in L.elements()  # noqa: E731
+                         if e["name"] == n)
+    L.create("haus", {"dach": "sattel", "breite": 120, "tiefe": 80,
+                      "hoehe": 60})
+    L.zinken([b for b in L.body_names() if b.startswith("Haus 1")])
+    L.create("zwerch", {"x": 40}, {"haus": eid("Haus 1"), "seite": "vorn"})
+    L.create("dachreiter", {"x": 90}, {"host": eid("Haus 1")})
+    L.create("podest", {}, {"host": eid("Haus 1")})
+    _sel(c, "Haus 1 Rueckwand", [60, 80, 30])
+    L.create("apsis", {})
+    L.create("kasten", {"breite": 80, "tiefe": 60, "hoehe": 50, "x": 200,
+                        "deckel": True})
+    L.zinken([b for b in L.body_names() if b.startswith("Kasten 1")])
+    L.create("ecktuerme", {"dach": "kegel"}, {"host": eid("Kasten 1")})
+    L.create("turm", {"dach": "flach", "x": -80, "y": 40})
+    L.create("helm", {}, {"host": eid("Turm 1")})
+    L.create("muehle", {"x": -80, "y": 200})
+    L.create("leuchtturm", {"x": 20, "y": 220})
+    L.create("steinbruecke", {"x": 120, "y": 180})
+    L.create("fachwerkbruecke", {"x": 120, "y": 260})
+    L.create("pagode", {"x": 300, "y": 180})
+    assert not [x for x in L.design()["timeline"] if x.get("error")]
+    sh = {n: L.shape(n) for n in L.body_names()}
+    bb = {n: (_vertices(s).min(0), _vertices(s).max(0))
+          for n, s in sh.items()}
+    wand = ("Boden", "Front", "Rueckwand", "Seite links", "Seite rechts",
+            "Deckel")
+    ks = list(sh)
+    for i, a in enumerate(ks):
+        for b in ks[i + 1:]:
+            (al, ah), (bl, bh) = bb[a], bb[b]
+            if (al > bh + 1e-6).any() or (bl > ah + 1e-6).any():
+                continue
+            if a.split()[:2] == b.split()[:2] and a.endswith(wand) \
+                    and b.endswith(wand):
+                continue                       # Zinkenstoß
+            assert _volume(_common(sh[a], sh[b])) < 0.05, (a, b)
+    assert "Turmhelm 1" in L.edit(eid("Turm 1"), {"hoehe": 100})
+    msg, files = L.export(ordner=str(tmp / "exp"))
+    assert "⚠" not in msg, msg
+    svg = "".join(open(f, encoding="utf-8").read() for f in files
+                  if f.endswith(".svg"))
+    for part in ("Haube Lage 1", "Treppe Lage 1", "Gewölbe 1",
+                 "Ecktürmchen 1 vl Kegel Lage 1", "Kragplatte"):
+        assert part in svg, part

@@ -24,6 +24,7 @@ import numpy as np
 
 from .hosts import UEBERGABE, sc_read_step
 from .laser_geom import FORMEN, MUSTER
+from .laser_bauten import BautenMixin
 from .laser_extra import ExtraMixin
 from .laser_haus import HausMixin
 from .laser_wand import WandMixin
@@ -202,11 +203,117 @@ SCHEMA = {
         ("x", "X", "mm", 0, -5000, 5000, 5),
         ("y", "Y", "mm", 0, -5000, 5000, 5),
         ("z", "Z", "mm", 0, -5000, 5000, 5)]},
+    "zwerch": {"label": "Zwerchgiebel", "fields": [
+        ("x", "von links", "mm", 50, -2000, 2000, 1),
+        ("breite", "Breite", "mm", 30, 8, 500, 1),
+        ("kniestock", "Kniestock", "mm", 12, 3, 200, 1),
+        ("neigung", "Neigung", "deg", 45, 15, 70, 5),
+        ("fenster", "Fenster", "bool", True, 0, 1, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "dachreiter": {"label": "Dachreiter", "fields": [
+        ("x", "von links", "mm", 50, -2000, 2000, 1),
+        ("breite", "Breite", "mm", 14, 6, 200, 1),
+        ("tiefe", "Tiefe", "mm", 14, 6, 200, 1),
+        ("hoehe", "über First", "mm", 14, 3, 300, 1),
+        ("neigung", "Neigung", "deg", 70, 20, 85, 5),
+        ("ueberstand", "Überstand", "mm", 1.5, 0, 20, 0.5),
+        ("kreuz", "Kreuz", "bool", True, 0, 1, 1),
+        ("kreuz_h", "Kreuzhöhe", "mm", 8, 3, 60, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "ecktuerme": {"label": "Ecktürmchen", "fields": [
+        ("auf", "Stehen", "choice", "krone", ["krone", "boden"], None, None),
+        ("dach", "Dach", "choice", "zinnen", ["zinnen", "kegel", "flach"],
+         None, None),
+        ("durchmesser", "Ø", "mm", 14, 4, 200, 1),
+        ("hoehe", "Höhe", "mm", 24, 3, 500, 3),
+        ("zinnen_h", "Zinnenhöhe", "mm", 6, 3, 30, 3),
+        ("neigung", "Neigung", "deg", 60, 20, 80, 5),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "podest": {"label": "Podest", "fields": [
+        ("hoehe", "Höhe", "mm", 9, 3, 200, 3),
+        ("rand", "Rand", "mm", 8, 0, 200, 1),
+        ("treppe", "Treppe", "bool", True, 0, 1, 1),
+        ("treppe_breite", "Treppe breit", "mm", 24, 6, 500, 1),
+        ("stufe", "Auftritt", "mm", 4, 2, 30, 0.5),
+        ("breite", "Breite (frei)", "mm", 80, 10, 2000, 5),
+        ("tiefe", "Tiefe (frei)", "mm", 60, 10, 2000, 5),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5),
+        ("x", "X", "mm", 0, -5000, 5000, 5),
+        ("y", "Y", "mm", 0, -5000, 5000, 5)]},
+    "helm": {"label": "Turmhelm", "fields": [
+        ("hoehe", "Höhe", "mm", 50, 5, 1000, 5),
+        ("ueberstand", "Überstand", "mm", 2, 0, 30, 0.5),
+        ("kreuz", "Kreuz", "bool", True, 0, 1, 1),
+        ("kreuz_h", "Kreuzhöhe", "mm", 12, 3, 100, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "apsis": {"label": "Apsis", "fields": [
+        ("x", "← →", "mm", 0.0, -2000, 2000, 1),
+        ("breite", "Breite", "mm", 40, 10, 1000, 2),
+        ("hoehe", "Höhe", "mm", 40, 5, 1000, 5),
+        ("segmente", "Segmente", "int", 5, 3, 16, 1),
+        ("neigung", "Neigung", "deg", 45, 15, 75, 5),
+        ("ueberstand", "Überstand", "mm", 3, 0, 30, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "muehle": {"label": "Windmühle", "fields": [
+        ("ecken", "Ecken", "int", 8, 5, 16, 1),
+        ("durchmesser", "Ø", "mm", 50, 20, 500, 5),
+        ("hoehe", "Höhe", "mm", 70, 20, 1000, 5),
+        ("haube_h", "Haube", "mm", 18, 6, 200, 3),
+        ("fluegel", "Flügel", "mm", 60, 15, 500, 5),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5),
+        ("x", "X", "mm", 0, -5000, 5000, 5),
+        ("y", "Y", "mm", 0, -5000, 5000, 5),
+        ("z", "Z", "mm", 0, -5000, 5000, 5)]},
+    "leuchtturm": {"label": "Leuchtturm", "fields": [
+        ("ecken", "Ecken", "int", 8, 5, 16, 1),
+        ("durchmesser", "Ø", "mm", 40, 15, 500, 5),
+        ("hoehe", "Höhe", "mm", 90, 20, 1000, 5),
+        ("umgang", "Umgang", "mm", 6, 2, 50, 1),
+        ("laterne_d", "Laterne Ø", "mm", 24, 8, 300, 2),
+        ("laterne_h", "Laterne h", "mm", 14, 5, 200, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5),
+        ("x", "X", "mm", 0, -5000, 5000, 5),
+        ("y", "Y", "mm", 0, -5000, 5000, 5),
+        ("z", "Z", "mm", 0, -5000, 5000, 5)]},
+    "steinbruecke": {"label": "Steinbrücke", "fields": [
+        ("laenge", "Länge", "mm", 120, 30, 2000, 5),
+        ("breite", "Breite", "mm", 36, 10, 500, 2),
+        ("hoehe", "Höhe", "mm", 32, 10, 500, 2),
+        ("boegen", "Bögen", "int", 2, 1, 12, 1),
+        ("bruestung", "Brüstung", "mm", 6, 0, 50, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5),
+        ("x", "X", "mm", 0, -5000, 5000, 5),
+        ("y", "Y", "mm", 0, -5000, 5000, 5),
+        ("z", "Z", "mm", 0, -5000, 5000, 5)]},
+    "fachwerkbruecke": {"label": "Fachwerkbrücke", "fields": [
+        ("laenge", "Spannweite", "mm", 120, 30, 2000, 5),
+        ("breite", "Breite", "mm", 36, 10, 500, 2),
+        ("hoehe", "Trägerhöhe", "mm", 26, 8, 300, 1),
+        ("felder", "Felder", "int", 6, 2, 30, 1),
+        ("stab", "Stab", "mm", 3, 1.5, 20, 0.5),
+        ("auflage", "Auflager", "mm", 6, 3, 100, 3),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5),
+        ("x", "X", "mm", 0, -5000, 5000, 5),
+        ("y", "Y", "mm", 0, -5000, 5000, 5),
+        ("z", "Z", "mm", 0, -5000, 5000, 5)]},
+    "pagode": {"label": "Pagode", "fields": [
+        ("stockwerke", "Geschosse", "int", 3, 1, 9, 1),
+        ("breite", "Breite", "mm", 60, 20, 1000, 5),
+        ("tiefe", "Tiefe", "mm", 60, 20, 1000, 5),
+        ("geschoss", "Geschoss h", "mm", 26, 10, 300, 1),
+        ("schrumpf", "Verjüngung", "float", 0.75, 0.4, 0.95, 0.05),
+        ("neigung", "Neigung", "deg", 30, 15, 60, 5),
+        ("ueberstand", "Überstand", "mm", 8, 0, 50, 1),
+        ("spitze", "Spitze", "bool", True, 0, 1, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5),
+        ("x", "X", "mm", 0, -5000, 5000, 5),
+        ("y", "Y", "mm", 0, -5000, 5000, 5),
+        ("z", "Z", "mm", 0, -5000, 5000, 5)]},
 }
 
 
 WAND_TYPES = ("fenster", "tuer", "blende", "muster", "uhr", "pfeiler",
-              "band", "eckquader", "vordach")
+              "band", "eckquader", "vordach", "apsis")
 
 
 def defaults(typ):
@@ -339,7 +446,7 @@ def _f(v):
 
 # --------------------------------------------------------- SolidCraft
 
-class Laser(WandMixin, HausMixin, ExtraMixin):
+class Laser(WandMixin, HausMixin, ExtraMixin, BautenMixin):
     """Werkzeuge gegen einen McpClient (laufende App oder headless)."""
 
     def __init__(self, client, staerke=3.0, finger=10.0):
@@ -704,7 +811,7 @@ class Laser(WandMixin, HausMixin, ExtraMixin):
         self._rebuild(el)
         self._save(els)                 # Abhängige lesen die neuen Werte
         extra = []
-        if el["typ"] in ("kasten", "haus"):      # Abhängiges zieht mit
+        if el["typ"] in ("kasten", "haus", "turm", "rundturm"):  # mitziehen
             for z in els:
                 folgt = (
                     (z["typ"] == "zinken"
@@ -713,8 +820,9 @@ class Laser(WandMixin, HausMixin, ExtraMixin):
                         and z["ctx"].get("kasten") == el["id"]
                         and (z["typ"] == "eckquader"
                              or z["params"].get("rundum")))
-                    or (z["typ"] in ("kamin", "gaube")
+                    or (z["typ"] in ("kamin", "gaube", "zwerch")
                         and z["ctx"].get("haus") == el["id"])
+                    or z["ctx"].get("host") == el["id"]
                     or (z["typ"] == "muster"
                         and z["ctx"].get("kasten") == el["id"]
                         and z["params"].get("bereich") == "flaeche"))
@@ -837,32 +945,46 @@ class Laser(WandMixin, HausMixin, ExtraMixin):
             t = float(d.max() - d.min())
             right, up = _frame_up(n)
             o = n * d.max()
-            geom = plate_section(s, n * (d.min() + d.max()) / 2, n, o,
-                                 right, up)
-            if geom.is_empty or abs(geom.area * t - _volume(s)) > \
-                    0.15 * _volume(s):
+            st = self.staerke
+            k = int(round(t / st))
+            if k >= 2 and abs(t - k * st) < 0.05 and k <= 60:
+                # mehrere Lagen: jede Lage auf ihrer Höhe schneiden
+                # (Scheibenbau: Stufenkegel, Kuppeln, Podeste, Doppelrahmen)
+                lagen = [(f"{name} Lage {i + 1}",
+                          plate_section(s, n * (d.min() + (i + 0.5) * st), n,
+                                        o, right, up)) for i in range(k)]
+                summe = sum(g.area for _nm, g in lagen) * st
+            else:
+                lagen = [(name, plate_section(s, n * (d.min() + d.max()) / 2,
+                                              n, o, right, up))]
+                summe = lagen[0][1].area * t
+                if abs(t - st) > 0.05:
+                    warn.append(f"{name}: {t:.2f} mm statt {st:g}")
+            if all(g.is_empty for _nm, g in lagen) or \
+                    abs(summe - _volume(s)) > 0.15 * _volume(s):
                 warn.append(f"{name}: keine ebene Platte")
                 continue
-            if abs(t - self.staerke) > 0.05:
-                lagen = t / self.staerke
-                warn.append(f"{name}: {t:.2f} mm" + (
-                    f" ({lagen:.0f} Lagen?)" if abs(lagen - round(lagen))
-                    < 0.05 else f" statt {self.staerke:g}"))
-            lines = []
-            inner = geom.buffer(-0.15)
-            for ctx, ls in engr.get(name, []):
-                P, R, U = (np.array(ctx[k], float)
-                           for k in ("p", "right", "up"))
-                for ln in ls:
-                    w = [P + R * x + U * y - o for x, y in ln]
-                    loc = [(float(q @ right), float(q @ up)) for q in w]
-                    if len(loc) >= 2:
-                        from .laser_geom import lines_of
-                        lines += lines_of(LineString(loc).intersection(inner))
-            x0, y0, _x1, _y1 = geom.bounds
-            geom = translate(geom, -x0, -y0)
-            lines = [[(x - x0, y - y0) for x, y in ln] for ln in lines]
-            teile.append((name, geom, lines))
+            for li, (nm, geom) in enumerate(lagen):
+                if geom.is_empty or geom.area < 0.5:
+                    continue
+                lines = []
+                if li == len(lagen) - 1:          # Gravur auf die oberste
+                    inner = geom.buffer(-0.15)
+                    for ctx, ls in engr.get(name, []):
+                        P, R, U = (np.array(ctx[q], float)
+                                   for q in ("p", "right", "up"))
+                        for ln in ls:
+                            w = [P + R * x + U * y - o for x, y in ln]
+                            loc = [(float(q @ right), float(q @ up))
+                                   for q in w]
+                            if len(loc) >= 2:
+                                from .laser_geom import lines_of
+                                lines += lines_of(
+                                    LineString(loc).intersection(inner))
+                x0, y0, _x1, _y1 = geom.bounds
+                geom = translate(geom, -x0, -y0)
+                lines = [[(x - x0, y - y0) for x, y in ln] for ln in lines]
+                teile.append((nm, geom, lines))
         sheets = nest(teile, platte, abstand)
         files = []
         for k, sheet in enumerate(sheets):

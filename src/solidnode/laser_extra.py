@@ -100,6 +100,11 @@ class ExtraMixin:
         return W, V
 
     def cmds_gaube(self, name, ctx, p):
+        return self._giebelgaube(name, ctx, p)
+
+    def _giebelgaube(self, name, ctx, p, zwerch=False):
+        """Giebelgaube; zwerch=True: Front in der Fassade, sitzt auf der
+        Traufwand, Hauptdach wird dort ausgeschnitten (Zwerchgiebel)."""
         h = next((e for e in self.elements() if e["id"] == ctx["haus"]), None)
         if h is None:
             raise RuntimeError("Haus der Gaube fehlt")
@@ -115,16 +120,36 @@ class ExtraMixin:
         w = max(p["breite"], 2 * t + 3)
         u = p["x"]
         u0, u1, hw = u - w / 2, u + w / 2, w / 2
-        dg, hg = p["tiefe"], p["hoehe"]
         ag = math.radians(p["neigung"])
         sg, cg, tg = math.sin(ag), math.cos(ag), math.tan(ag)
         top = lambda y: H + y * ta + t / ca                    # noqa: E731
-        z0 = top(dg + t) + 0.2
-        zT, zG = z0 + hg, z0 + hg + hw * tg
+        if zwerch:
+            dg = 0.0
+            z0 = H                                  # auf der Traufwand
+            zT = H + p["kniestock"]
+            zc = top(t) + 0.2                       # Wangen ab Dachfläche
+        else:
+            dg, hg = p["tiefe"], p["hoehe"]
+            z0 = zc = top(dg + t) + 0.2
+            zT = z0 + hg
+        hg = zT - z0
+        zG = zT + hw * tg
         if (zG + t / cg - (H + t / ca)) / ta > half - 1:
             raise RuntimeError("Gaube reicht über den First (kleiner oder "
                                "näher an die Traufe)")
         cmds, bodies = [], []
+        if zwerch:                                  # Hauptdach aufschneiden
+            roof = f"{h['name']} " + ("Dach" if hp["dach"] == "pult" else
+                                      "Dach hinten" if ctx["seite"] == "hinten"
+                                      else "Dach vorn")
+            q = [W(u0, -_ov - 1, 0), W(u1, -_ov - 1, 0), W(u1, t, 0),
+                 W(u0, t, 0)]
+            xs, ys = [v[0] for v in q], [v[1] for v in q]
+            zz = W(0, 0, top(half) + 20)[2]
+            cmds += self._cut_plan(f"{name} Dachausschnitt",
+                                   [(min(xs), min(ys)), (max(xs), min(ys)),
+                                    (max(xs), max(ys)), (min(xs), max(ys))],
+                                   zz, zz - W(0, 0, H - 1)[2], [roof])
 
         def plate(nm, pts, n_out, inward=False, holes=()):
             cmds.extend(self._plate3d(f"{name} {nm}", pts, n_out, t,
@@ -146,7 +171,7 @@ class ExtraMixin:
         dEnd = (zT - 0.2 - H - t / ca) / ta
         for nm, xc, n_out in (("Wange links", u0, [-1, 0, 0]),
                               ("Wange rechts", u1, [1, 0, 0])):
-            pts = [W(xc, dg + t, z0), W(xc, dEnd, zT), W(xc, dg + t, zT)]
+            pts = [W(xc, dg + t, zc), W(xc, dEnd, zT), W(xc, dg + t, zT)]
             plate(nm, pts, V(n_out), inward=True)
         # Dachplatten: Unterseite durch die Oberkanten der Wangen, hinten
         # auf der Hauptdachfläche abgeschnitten
@@ -163,8 +188,9 @@ class ExtraMixin:
             pts = [W(ue + side * v * cg, dS + s, zT + v * sg) for s, v in ring]
             n_out = V([-side * sg, 0, cg])
             plate(nm, pts, n_out)
+        art = "Zwerchgiebel " if zwerch else ""
         return cmds, bodies, \
-            f"{w:g} breit, {hg:g} hoch, {ctx['seite']} auf {h['name']}"
+            f"{art}{w:g} breit, {hg:g} hoch, {ctx['seite']} auf {h['name']}"
 
     # ---------------------------------------------------------- Vordach
 
@@ -356,6 +382,8 @@ class ExtraMixin:
         slots = hinge_slots(L, H, p["schnitt"], p["steg"], p["abstand"],
                             p["schlitz"])
         out.append((f"{el['name']} Mantel", strip.difference(slots), []))
+        # Klebelasche: wird innen über den Stoß geklebt
+        out.append((f"{el['name']} Mantel Lasche", box(0, 0, 8, H - 2), []))
         if p["dach"] == "kegel":
             a = math.radians(p["neigung"])
             Ro = R + p["ueberstand"]
@@ -379,4 +407,7 @@ class ExtraMixin:
                     r += pitch
             cone = sector.difference(unary_union(sl)) if sl else sector
             out.append((f"{el['name']} Kegeldach", cone, []))
+            out.append((f"{el['name']} Kegeldach Lasche",
+                        Polygon([(0, 0), (s * 0.85, 2), (s * 0.85, 6),
+                                 (0, 4)]), []))
         return out

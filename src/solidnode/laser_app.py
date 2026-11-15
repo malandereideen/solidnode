@@ -35,6 +35,24 @@ KATALOG = [
      "angelegt; der Mantel kommt im Export als Streifen mit Living Hinge."),
     ("Dach", "Gaube", "gaube", {}, "Dachfläche des Hauses anklicken "
      "(vorn/hinten); „von links“ = Mitte der Gaube."),
+    ("Dach", "Zwerchgiebel", "zwerch", {}, "Dachfläche des Hauses anklicken "
+     "(vorn/hinten); steht in der Fassade auf der Traufwand."),
+    ("Dach", "Dachreiter", "dachreiter", {}, "Haus mit Satteldach anklicken; "
+     "sitzt auf dem First."),
+    ("Dach", "Turmhelm + Kreuz", "helm", {}, "Turm anklicken (Dach dort "
+     "„flach“ oder „zinnen“)."),
+    ("Baukörper", "Ecktürmchen (4)", "ecktuerme", {}, "Kasten/Haus anklicken; "
+     "„krone“ = auf der Mauerkrone, „boden“ = außen an den Ecken."),
+    ("Baukörper", "Podest mit Treppe", "podest", {}, "Kasten/Haus anklicken "
+     "(sonst frei mit Breite/Tiefe bei X/Y); liegt unter dem Gebäude."),
+    ("Baukörper", "Apsis", "apsis", {}, _WAND + " (Mitte der Apsis)."),
+    ("Baukörper", "Windmühle", "muehle", {}, "Wird bei X/Y/Z angelegt."),
+    ("Baukörper", "Leuchtturm", "leuchtturm", {}, "Wird bei X/Y/Z angelegt."),
+    ("Baukörper", "Pagode", "pagode", {}, "Wird bei X/Y/Z angelegt."),
+    ("Brücken", "Steinbrücke", "steinbruecke", {}, "Wird bei X/Y/Z angelegt; "
+     "die Gewölbe kommen im Export als Streifen mit Living Hinge."),
+    ("Brücken", "Fachwerkbrücke", "fachwerkbruecke", {}, "Wird bei X/Y/Z "
+     "angelegt."),
     ("Öffnungen", "Fenster", "fenster", {}, _WAND + " (Fenstermitte)."),
     ("Öffnungen", "Tür", "tuer", {}, _WAND + " (Türmitte; unten sitzt sie "
      "auf der Wandkante bzw. dem Boden)."),
@@ -75,6 +93,14 @@ def _field(kind, value, lo, hi, step):
     if kind == "bool":
         w = QCheckBox()
         w.setChecked(bool(value))
+        return w
+    if kind == "float":
+        w = QDoubleSpinBox()
+        w.setRange(lo, hi)
+        w.setDecimals(2)
+        w.setSingleStep(step)
+        w.setValue(float(value))
+        w.setKeyboardTracking(False)
         return w
     if kind == "int":
         w = QSpinBox()
