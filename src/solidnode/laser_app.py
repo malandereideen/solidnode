@@ -1,7 +1,9 @@
 """Laser-Palette: kleines Fenster neben SolidCraft (`solidnode laser`).
 
-Arbeitet auf der Auswahl im offenen SolidCraft-Design; alles, was die
-Palette baut, landet als normale Features in der Timeline (Strg+Z geht).
+Reiter „Neu“ legt Elemente an, Reiter „Elemente“ listet alles, was die
+Palette im offenen Design gebaut hat: anklicken = in SolidCraft markieren,
+Werte ändern + Übernehmen = an derselben Timeline-Stelle neu bauen.
+Die Liste steht in den Metadaten des Designs und reist mit der .sc-Datei.
 """
 
 from __future__ import annotations
@@ -12,28 +14,72 @@ import sys
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox,
                                QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-                               QPushButton, QSpinBox, QVBoxLayout, QWidget)
+                               QPushButton, QSpinBox, QTabWidget, QTreeWidget,
+                               QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from . import hosts
-from .laser import Laser
+from .laser import SCHEMA, Laser, defaults
 
 
-def _num(v, lo, hi, step=0.5, dec=1, suffix=" mm"):
+def _field(kind, value, lo, hi, step):
+    if kind == "bool":
+        w = QCheckBox()
+        w.setChecked(bool(value))
+        return w
+    if kind == "int":
+        w = QSpinBox()
+        w.setRange(int(lo), int(hi))
+        w.setValue(int(value))
+        return w
     w = QDoubleSpinBox()
     w.setRange(lo, hi)
-    w.setDecimals(dec)
+    w.setDecimals(2 if step < 0.5 else 1)
     w.setSingleStep(step)
-    w.setValue(v)
-    w.setSuffix(suffix)
+    w.setValue(float(value))
+    w.setSuffix("°" if kind == "deg" else " mm")
     w.setKeyboardTracking(False)
     return w
 
 
-def _int(v, lo, hi):
-    w = QSpinBox()
-    w.setRange(lo, hi)
-    w.setValue(v)
-    return w
+def _value(w):
+    if isinstance(w, QCheckBox):
+        return w.isChecked()
+    return w.value()
+
+
+class Form:
+    """Formular aus SCHEMA[typ]; `keys` begrenzt die gezeigten Felder."""
+
+    def __init__(self, typ, values=None, keys=None, cols=2):
+        self.typ = typ
+        self.widgets = {}
+        self.box = QWidget()
+        f = QFormLayout(self.box)
+        f.setContentsMargins(0, 0, 0, 0)
+        f.setSpacing(3)
+        vals = defaults(typ)
+        vals.update(values or {})
+        row, n = None, 0
+        for key, label, kind, _d, lo, hi, step in SCHEMA[typ]["fields"]:
+            if keys and key not in keys:
+                continue
+            w = _field(kind, vals.get(key, _d), lo, hi, step)
+            self.widgets[key] = w
+            if kind == "bool":
+                w.setText(label)
+                f.addRow(w)
+                continue
+            if n % cols == 0:
+                row = QHBoxLayout()
+                f.addRow(row)
+            lab = QLabel(label)
+            lab.setStyleSheet("color: #999;")
+            row.addWidget(lab)
+            row.addWidget(w, 1)
+            n += 1
+
+    def values(self):
+        return {k: _value(w) for k, w in self.widgets.items()}
 
 
 class Palette(QWidget):
@@ -44,107 +90,127 @@ class Palette(QWidget):
         self.headless = headless
         self.client = None
         self.files = []
+        self.els = []
+        self.edit_form = None
         root = QVBoxLayout(self)
-        root.setContentsMargins(8, 8, 8, 8)
-        root.setSpacing(6)
+        root.setContentsMargins(6, 6, 6, 6)
+        root.setSpacing(4)
 
-        g = self._group(root, "Material")
-        self.staerke = _num(3.0, 0.5, 20, 0.5)
-        self.finger = _num(10.0, 3, 60, 1)
-        g.addRow("Stärke", self.staerke)
-        g.addRow("Zinke", self.finger)
+        g = QHBoxLayout()
+        self.staerke = _field("mm", 3.0, 0.5, 20, 0.5)
+        self.finger = _field("mm", 10.0, 3, 60, 1)
+        g.addWidget(QLabel("Stärke"))
+        g.addWidget(self.staerke, 1)
+        g.addWidget(QLabel("Zinke"))
+        g.addWidget(self.finger, 1)
+        root.addLayout(g)
 
-        g = self._group(root, "Kasten")
-        self.kb, self.kt, self.kh = (_num(120, 10, 2000, 5, 0),
-                                     _num(80, 10, 2000, 5, 0),
-                                     _num(60, 10, 2000, 5, 0))
-        row = QHBoxLayout()
-        for w in (self.kb, self.kt, self.kh):
-            w.setSuffix("")
-            row.addWidget(w)
-        g.addRow("B×T×H", row)
-        self.deckel = QCheckBox("Deckel")
-        g.addRow(self.deckel, self._btn("Kasten anlegen", self.do_kasten))
-
-        g = self._group(root, "Zinken")
-        g.addRow(QLabel("Platten überlappen lassen, dann:"))
-        row = QHBoxLayout()
-        row.addWidget(self._btn("Auswahl", lambda: self.do_zinken(True)))
-        row.addWidget(self._btn("Alle Stöße", lambda: self.do_zinken(False)))
-        g.addRow(row)
-
-        g = self._group(root, "Living Hinge")
-        g.addRow(QLabel("Biegelinie (oder Rechteck) auf die Platte\n"
-                        "skizzieren und auswählen."))
-        self.hr = _num(15, 1, 500, 1)
-        self.hw = _num(90, 5, 360, 5, 0, "°")
-        row = QHBoxLayout()
-        row.addWidget(self.hr)
-        row.addWidget(self.hw)
-        g.addRow("Radius/Winkel", row)
-        self.hs, self.hst, self.ha = (_num(15, 3, 100, 1), _num(3, 1, 20, 0.5),
-                                      _num(1.5, 0.5, 10, 0.25, 2))
-        row = QHBoxLayout()
-        for w in (self.hs, self.hst, self.ha):
-            w.setSuffix("")
-            row.addWidget(w)
-        g.addRow("Schnitt/Steg/Abst.", row)
-        g.addRow(self._btn("Hinge schneiden", self.do_hinge))
-
-        g = self._group(root, "Fenster")
-        g.addRow(QLabel("Wandfläche an der Mitte des Fensters anklicken."))
-        self.fb, self.fh = _num(20, 2, 500, 1, 0), _num(30, 2, 500, 1, 0)
-        row = QHBoxLayout()
-        row.addWidget(self.fb)
-        row.addWidget(self.fh)
-        g.addRow("B×H", row)
-        self.fr, self.fs = _num(3, 0.5, 30, 0.5), _num(1.5, 0.5, 10, 0.5)
-        row = QHBoxLayout()
-        row.addWidget(self.fr)
-        row.addWidget(self.fs)
-        g.addRow("Rahmen/Sprosse", row)
-        self.fv, self.fhz = _int(1, 0, 10), _int(1, 0, 10)
-        row = QHBoxLayout()
-        row.addWidget(self.fv)
-        row.addWidget(self.fhz)
-        g.addRow("Sprossen ↕/↔", row)
-        self.fo = QCheckBox("Öffnung schneiden")
-        self.fo.setChecked(True)
-        g.addRow(self.fo, self._btn("Fenster setzen", self.do_fenster))
-
-        g = self._group(root, "Export")
-        self.pw, self.ph = _num(400, 50, 2000, 10, 0), _num(300, 50, 2000,
-                                                            10, 0)
-        row = QHBoxLayout()
-        row.addWidget(self.pw)
-        row.addWidget(self.ph)
-        g.addRow("Platte", row)
-        g.addRow(self._btn("SVG für xTool", self.do_export))
+        self.tabs = QTabWidget()
+        root.addWidget(self.tabs)
+        self.tabs.addTab(self._tab_neu(), "Neu")
+        self.tabs.addTab(self._tab_elemente(), "Elemente")
+        self.tabs.currentChanged.connect(
+            lambda i: self.refresh() if i == 1 else None)
 
         self.status = QLabel("")
         self.status.setWordWrap(True)
         self.status.setStyleSheet("color: #888;")
         root.addWidget(self.status)
         if not headless and not hosts.port_open(hosts.SOLIDCRAFT_PORT):
-            row = self._btn("SolidCraft starten", self.start_sc)
-            root.addWidget(row)
+            root.addWidget(self._btn("SolidCraft starten", self.start_sc))
             self.say("SolidCraft läuft nicht mit Steuerport "
                      f"{hosts.SOLIDCRAFT_PORT}.")
 
     # -- Aufbau
 
-    def _group(self, root, title):
+    def _group(self, lay, title, hint=None):
         box = QGroupBox(title)
-        f = QFormLayout(box)
-        f.setContentsMargins(6, 4, 6, 4)
-        f.setSpacing(4)
-        root.addWidget(box)
-        return f
+        v = QVBoxLayout(box)
+        v.setContentsMargins(6, 4, 6, 4)
+        v.setSpacing(3)
+        if hint:
+            h = QLabel(hint)
+            h.setStyleSheet("color: #999;")
+            h.setWordWrap(True)
+            v.addWidget(h)
+        lay.addWidget(box)
+        return v
 
     def _btn(self, text, fn):
         b = QPushButton(text)
         b.clicked.connect(fn)
         return b
+
+    def _tab_neu(self):
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        lay.setContentsMargins(4, 4, 4, 4)
+        lay.setSpacing(4)
+        v = self._group(lay, "Kasten")
+        self.f_kasten = Form("kasten", keys=["breite", "tiefe", "hoehe",
+                                             "deckel"], cols=3)
+        v.addWidget(self.f_kasten.box)
+        v.addWidget(self._btn("Kasten anlegen", self.do_kasten))
+
+        v = self._group(lay, "Zinken", "Platten überlappen lassen.")
+        row = QHBoxLayout()
+        row.addWidget(self._btn("Auswahl", lambda: self.do_zinken(True)))
+        row.addWidget(self._btn("Alle Stöße", lambda: self.do_zinken(False)))
+        v.addLayout(row)
+
+        v = self._group(lay, "Living Hinge", "Biegelinie (oder Rechteck) "
+                        "auf die Platte skizzieren und auswählen.")
+        self.f_hinge = Form("hinge", keys=["radius", "winkel", "schnitt",
+                                           "steg", "abstand", "schlitz"])
+        v.addWidget(self.f_hinge.box)
+        v.addWidget(self._btn("Hinge schneiden", self.do_hinge))
+
+        v = self._group(lay, "Fenster", "Wandfläche an der Fenstermitte "
+                        "anklicken.")
+        self.f_fenster = Form("fenster", keys=[
+            "breite", "hoehe", "rahmen", "sprosse", "sprossen_v",
+            "sprossen_h", "oeffnung"])
+        v.addWidget(self.f_fenster.box)
+        v.addWidget(self._btn("Fenster setzen", self.do_fenster))
+
+        v = self._group(lay, "Export")
+        row = QHBoxLayout()
+        self.pw = _field("mm", 400, 50, 2000, 10)
+        self.ph = _field("mm", 300, 50, 2000, 10)
+        row.addWidget(QLabel("Platte"))
+        row.addWidget(self.pw)
+        row.addWidget(self.ph)
+        v.addLayout(row)
+        v.addWidget(self._btn("SVG für xTool", self.do_export))
+        lay.addStretch(1)
+        return w
+
+    def _tab_elemente(self):
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        lay.setContentsMargins(4, 4, 4, 4)
+        lay.setSpacing(4)
+        self.tree = QTreeWidget()
+        self.tree.setHeaderLabels(["Element", "Info"])
+        self.tree.setRootIsDecorated(False)
+        self.tree.setColumnWidth(0, 95)
+        self.tree.setMinimumHeight(140)
+        self.tree.itemSelectionChanged.connect(self.on_select)
+        lay.addWidget(self.tree, 1)
+        self.edit_box = QGroupBox("–")
+        self.edit_lay = QVBoxLayout(self.edit_box)
+        self.edit_lay.setContentsMargins(6, 4, 6, 4)
+        lay.addWidget(self.edit_box)
+        row = QHBoxLayout()
+        self.b_apply = self._btn("Übernehmen", self.do_apply)
+        self.b_place = self._btn("Neu platzieren", self.do_place)
+        self.b_del = self._btn("Löschen", self.do_delete)
+        for b in (self.b_apply, self.b_place, self.b_del):
+            row.addWidget(b)
+            b.setEnabled(False)
+        lay.addLayout(row)
+        lay.addWidget(self._btn("Liste neu laden", self.refresh))
+        return w
 
     def say(self, text, error=False):
         self.status.setStyleSheet("color: %s;" % ("#d55" if error else "#888"))
@@ -164,45 +230,48 @@ class Palette(QWidget):
                                            hosts.UEBERGABE])
         return Laser(self.client, self.staerke.value(), self.finger.value())
 
-    def run(self, label, fn):
-        self.say(label + " …")
+    def run(self, label, fn, refresh=True, silent=False):
+        if not silent:
+            self.say(label + " …")
         QApplication.setOverrideCursor(Qt.WaitCursor)
+        ok = False
         try:
             msg = fn(self.laser())
-            self.say(msg)
+            if msg:
+                self.say(msg)
+            ok = True
         except Exception as exc:              # noqa: BLE001
-            text = str(exc)
-            if "ConnectionError" in type(exc).__name__ or not (
-                    self.client and self.client.alive()):
+            if not (self.client and self.client.alive()):
                 self.client = None
-            self.say(f"{label}: {text[:300]}", error=True)
+            self.say(f"{label}: {str(exc)[:300]}", error=True)
         finally:
             QApplication.restoreOverrideCursor()
+        if ok and refresh:
+            self.refresh(quiet=True)
+        return ok
 
-    # -- Werkzeuge
+    # -- Neu
+
+    def _mat(self, p):
+        p["staerke"] = self.staerke.value()
+        return p
 
     def do_kasten(self):
-        self.run("Kasten", lambda L: L.kasten(
-            self.kb.value(), self.kt.value(), self.kh.value(),
-            self.deckel.isChecked()))
+        self.run("Kasten", lambda L: L.create(
+            "kasten", self._mat(self.f_kasten.values())))
 
     def do_zinken(self, auswahl):
-        def fn(L):
-            if auswahl:
-                return L.zinken()
-            return L.zinken(L.body_names())
-        self.run("Zinken", fn)
+        self.run("Zinken", lambda L: L.create(
+            "zinken", {"zinke": self.finger.value()},
+            L.ctx_zinken(None if auswahl else L.body_names())))
 
     def do_hinge(self):
-        self.run("Living Hinge", lambda L: L.hinge(
-            self.hr.value(), self.hw.value(), self.hs.value(),
-            self.hst.value(), self.ha.value()))
+        self.run("Living Hinge", lambda L: L.create(
+            "hinge", self.f_hinge.values()))
 
     def do_fenster(self):
-        self.run("Fenster", lambda L: L.fenster(
-            self.fb.value(), self.fh.value(), self.fr.value(),
-            self.fv.value(), self.fhz.value(), self.fs.value(),
-            self.fo.isChecked()))
+        self.run("Fenster", lambda L: L.create(
+            "fenster", self._mat(self.f_fenster.values())))
 
     def do_export(self):
         def fn(L):
@@ -212,7 +281,87 @@ class Palette(QWidget):
             if files and sys.platform == "darwin" and not self.headless:
                 subprocess.Popen(["open", "-R", files[0]])
             return msg
-        self.run("Export", fn)
+        self.run("Export", fn, refresh=False)
+
+    # -- Elemente
+
+    def refresh(self, quiet=False):
+        keep = self.current_id()
+
+        def fn(L):
+            self.els = L.elements()
+            st = L.status(self.els)
+            self.tree.blockSignals(True)
+            self.tree.clear()
+            for e in self.els:
+                s = st.get(e["id"], "?")
+                it = QTreeWidgetItem([e["name"], e.get("info", "")
+                                      if s == "ok" else f"⚠ {s}"])
+                it.setData(0, Qt.UserRole, e["id"])
+                it.setToolTip(1, e.get("info", ""))
+                self.tree.addTopLevelItem(it)
+                if e["id"] == keep:
+                    self.tree.setCurrentItem(it)
+            self.tree.blockSignals(False)
+            self.show_form()
+            return None if quiet else f"{len(self.els)} Elemente"
+        self.run("Liste", fn, refresh=False, silent=quiet)
+
+    def current_id(self):
+        it = self.tree.currentItem() if self.tree.selectedItems() else None
+        return it.data(0, Qt.UserRole) if it else None
+
+    def current(self):
+        eid = self.current_id()
+        return next((e for e in self.els if e["id"] == eid), None)
+
+    def show_form(self):
+        while self.edit_lay.count():
+            w = self.edit_lay.takeAt(0).widget()
+            if w:
+                w.deleteLater()
+        el = self.current()
+        self.edit_form = None
+        for b in (self.b_apply, self.b_place, self.b_del):
+            b.setEnabled(el is not None)
+        if el is None:
+            self.edit_box.setTitle("–")
+            return
+        self.edit_box.setTitle(el["name"])
+        self.edit_form = Form(el["typ"], el["params"])
+        self.edit_lay.addWidget(self.edit_form.box)
+        self.b_place.setEnabled(el["typ"] in ("fenster", "hinge", "zinken"))
+        self.b_place.setToolTip({
+            "fenster": "Neue Wandfläche/Mitte in SolidCraft anklicken, dann hier",
+            "hinge": "Andere Biegelinie auswählen, dann hier",
+            "zinken": "Platten auswählen (oder nichts = alle), dann hier",
+        }.get(el["typ"], ""))
+
+    def on_select(self):
+        self.show_form()
+        el = self.current()
+        if el:
+            self.run("Markieren", lambda L: L.highlight(el["id"])
+                     or f"{el['name']}: {el.get('info', '')}",
+                     refresh=False, silent=True)
+
+    def do_apply(self):
+        el = self.current()
+        if el and self.edit_form:
+            vals = self.edit_form.values()
+            self.run(el["name"], lambda L: L.edit(el["id"], vals))
+
+    def do_place(self):
+        el = self.current()
+        if el:
+            vals = self.edit_form.values() if self.edit_form else None
+            self.run(el["name"], lambda L: L.edit(el["id"], vals,
+                                                  replace_ctx=True))
+
+    def do_delete(self):
+        el = self.current()
+        if el:
+            self.run(el["name"], lambda L: L.delete(el["id"]))
 
     def closeEvent(self, ev):
         if self.client:
@@ -224,8 +373,6 @@ def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     app = QApplication.instance() or QApplication(sys.argv[:1])
     w = Palette(headless="--headless" in argv)
-    w.resize(300, 10)
+    w.resize(320, 10)
     w.show()
-    if "--quit-after-show" in argv:
-        return w
     sys.exit(app.exec())

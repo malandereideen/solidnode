@@ -41,10 +41,10 @@ def test_kasten_zinken_exakt_ohne_ueberlappung(laser):
 def test_fenster_und_hinge(laser):
     L, c, _ = laser
     L.kasten(120, 80, 60)
-    c.execute("select.set", {"items": [{"type": "face", "body": "Front",
+    c.execute("select.set", {"items": [{"type": "face", "body": "Kasten 1 Front",
                                         "point": [60, 0, 30]}]})
     L.fenster(30, 36)
-    assert any(n.startswith("Fenster ") for n in L.body_names())
+    assert "Fenster 1 Rahmen" in L.body_names()
     c.tool("new_design", {})
     L.batch(L._box_plate("Streifen", (0, 0, 0), (150, 60, 3)))
     c.execute("sketch.create", {"plane": {"origin": [0, 0, 3],
@@ -57,5 +57,28 @@ def test_fenster_und_hinge(laser):
                                         "sketch": sk["id"],
                                         "id": sk["curves"][0]["id"]}]})
     before = _total(c)
-    assert "Living Hinge in Streifen" in L.hinge(15, 90)
+    assert "Hinge 1: Streifen" in L.hinge(15, 90)
     assert _total(c) < before
+
+
+def test_elemente_aendern_speichern_loeschen(laser):
+    L, c, tmp = laser
+    L.kasten(120, 80, 60)
+    L.zinken()
+    c.execute("select.set", {"items": [{"type": "face",
+                                        "body": "Kasten 1 Front",
+                                        "point": [60, 0, 30]}]})
+    L.fenster(30, 36)
+    k, z, f = (e["id"] for e in L.elements())
+    L.edit(f, {"breite": 40, "x": -20, "sprossen_v": 2})
+    assert "nachgezogen" in L.edit(k, {"hoehe": 80})
+    assert json.loads(c.execute("inspect.interference", {}))["count"] == 0
+    assert not [x for x in L.design()["timeline"] if x.get("error")]
+    c.tool("save", {"path": str(tmp / "k.sc")})
+    c.tool("new_design", {})
+    c.tool("open", {"path": str(tmp / "k.sc")})
+    els = L.elements()
+    assert [e["name"] for e in els] == ["Kasten 1", "Zinken 1", "Fenster 1"]
+    assert set(L.status(els).values()) == {"ok"}
+    L.delete(f)
+    assert abs(_total(c) - (120 * 80 * 80 - 114 * 74 * 77)) < 0.01
