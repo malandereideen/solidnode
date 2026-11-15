@@ -23,6 +23,9 @@ import time
 import numpy as np
 
 from .hosts import UEBERGABE, sc_read_step
+from .laser_geom import FORMEN, MUSTER
+from .laser_haus import HausMixin
+from .laser_wand import WandMixin
 
 EPS = 1e-6
 META = "de.malandereideen.laser"        # Elementliste im Design (Metadaten)
@@ -49,18 +52,125 @@ SCHEMA = {
         ("abstand", "Abstand", "mm", 1.5, 0.5, 10, 0.25),
         ("schlitz", "Schlitz", "mm", 0.5, 0.1, 3, 0.1)]},
     "fenster": {"label": "Fenster", "fields": [
+        ("form", "Form", "choice", "rechteck", FORMEN, None, None),
         ("breite", "Breite", "mm", 20.0, 2, 500, 1),
         ("hoehe", "Höhe", "mm", 30.0, 2, 500, 1),
         ("x", "← →", "mm", 0.0, -2000, 2000, 1),
         ("y", "↓ ↑", "mm", 0.0, -2000, 2000, 1),
-        ("rahmen", "Rahmen", "mm", 3.0, 0.5, 30, 0.5),
+        ("rahmen", "Rahmen", "mm", 3.0, 0, 30, 0.5),
         ("sprosse", "Sprosse", "mm", 1.5, 0.5, 10, 0.5),
         ("sprossen_v", "Sprossen ↕", "int", 1, 0, 10, 1),
         ("sprossen_h", "Sprossen ↔", "int", 1, 0, 10, 1),
         ("oeffnung", "Öffnung", "bool", True, 0, 1, 1),
+        ("sims", "Fensterbank", "bool", False, 0, 1, 1),
         ("lagen", "Lagen", "int", 1, 1, 5, 1),
         ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "tuer": {"label": "Tür", "fields": [
+        ("form", "Form", "choice", "bogen", FORMEN[:3], None, None),
+        ("breite", "Breite", "mm", 12.0, 2, 500, 1),
+        ("hoehe", "Höhe", "mm", 22.0, 2, 500, 1),
+        ("x", "← →", "mm", 0.0, -2000, 2000, 1),
+        ("rahmen", "Rahmen", "mm", 2.0, 0, 30, 0.5),
+        ("blatt", "Türblatt", "bool", True, 0, 1, 1),
+        ("bretter", "Bretter", "bool", True, 0, 1, 1),
+        ("brett", "Brett", "mm", 2.5, 1, 20, 0.5),
+        ("lagen", "Lagen", "int", 1, 1, 5, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "blende": {"label": "Blende", "fields": [
+        ("form", "Form", "choice", "spitz", FORMEN, None, None),
+        ("breite", "Breite", "mm", 8.0, 2, 500, 1),
+        ("hoehe", "Höhe", "mm", 20.0, 2, 500, 1),
+        ("x", "← →", "mm", 0.0, -2000, 2000, 1),
+        ("y", "↓ ↑", "mm", 0.0, -2000, 2000, 1),
+        ("rand", "Rand", "mm", 2.0, 0.5, 30, 0.5),
+        ("anzahl", "Anzahl", "int", 1, 1, 30, 1),
+        ("abstand", "Abstand", "mm", 12.0, 2, 500, 1),
+        ("lagen", "Lagen", "int", 1, 1, 5, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "muster": {"label": "Muster", "fields": [
+        ("muster", "Muster", "choice", "backstein", MUSTER, None, None),
+        ("bereich", "Bereich", "choice", "flaeche", ["flaeche", "feld"],
+         None, None),
+        ("breite", "Breite", "mm", 30.0, 2, 2000, 1),
+        ("hoehe", "Höhe", "mm", 30.0, 2, 2000, 1),
+        ("x", "← →", "mm", 0.0, -2000, 2000, 1),
+        ("y", "↓ ↑", "mm", 0.0, -2000, 2000, 1),
+        ("form", "Feldform", "choice", "rechteck", FORMEN, None, None),
+        ("stein_h", "Stein h", "mm", 0.0, 0, 50, 0.5),
+        ("stein_l", "Stein l", "mm", 0.0, 0, 100, 0.5),
+        ("rand", "Rand", "bool", True, 0, 1, 1),
+        ("tiefe", "Tiefe", "mm", 0.2, 0.05, 2, 0.05)]},
+    "uhr": {"label": "Uhr", "fields": [
+        ("durchmesser", "Ø", "mm", 12.0, 3, 200, 1),
+        ("x", "← →", "mm", 0.0, -2000, 2000, 1),
+        ("y", "↓ ↑", "mm", 0.0, -2000, 2000, 1),
+        ("lagen", "Lagen", "int", 1, 1, 5, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "pfeiler": {"label": "Pfeiler", "fields": [
+        ("x", "← →", "mm", 0.0, -2000, 2000, 1),
+        ("breite", "Breite", "mm", 6.0, 1, 100, 1),
+        ("hoehe", "Höhe", "mm", 40.0, 5, 1000, 1),
+        ("tiefe", "Tiefe", "mm", 8.0, 2, 200, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "band": {"label": "Band", "fields": [
+        ("art", "Art", "choice", "gesims", ["gesims", "sockel", "trauf",
+                                            "fries"], None, None),
+        ("z", "Höhe ab", "mm", 30.0, 0, 2000, 1),
+        ("hoehe", "Bandhöhe", "mm", 3.0, 0.5, 100, 0.5),
+        ("bogen", "Bogenweite", "mm", 6.0, 3, 50, 0.5),
+        ("rundum", "Rundum", "bool", True, 0, 1, 1),
+        ("lagen", "Lagen", "int", 1, 1, 5, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "eckquader": {"label": "Eckquader", "fields": [
+        ("hoehe", "Quaderhöhe", "mm", 5.0, 1, 50, 0.5),
+        ("lang", "Lang", "mm", 10.0, 2, 100, 0.5),
+        ("kurz", "Kurz", "mm", 6.0, 1, 100, 0.5),
+        ("fuge", "Fuge", "mm", 1.2, 0.3, 10, 0.1),
+        ("lagen", "Lagen", "int", 1, 1, 5, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "haus": {"label": "Haus", "fields": [
+        ("dach", "Dach", "choice", "sattel", ["sattel", "pult", "walm",
+                                              "flach"], None, None),
+        ("breite", "Breite", "mm", 100, 10, 2000, 5),
+        ("tiefe", "Tiefe", "mm", 70, 10, 2000, 5),
+        ("hoehe", "Traufhöhe", "mm", 60, 10, 2000, 5),
+        ("neigung", "Neigung", "deg", 45, 10, 75, 5),
+        ("ueberstand", "Überstand", "mm", 5, 0, 50, 1),
+        ("zinnen", "Zinnen", "bool", False, 0, 1, 1),
+        ("zinnen_h", "Zinnenhöhe", "mm", 8, 2, 50, 1),
+        ("zinnen_b", "Zinnenbreite", "mm", 8, 2, 50, 1),
+        ("boden", "Boden", "bool", True, 0, 1, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5),
+        ("x", "X", "mm", 0, -5000, 5000, 5),
+        ("y", "Y", "mm", 0, -5000, 5000, 5),
+        ("z", "Z", "mm", 0, -5000, 5000, 5)]},
+    "turm": {"label": "Turm", "fields": [
+        ("dach", "Dach", "choice", "zelt", ["zelt", "zinnen", "flach"],
+         None, None),
+        ("ecken", "Ecken", "int", 8, 3, 24, 1),
+        ("durchmesser", "Ø", "mm", 50, 10, 1000, 5),
+        ("hoehe", "Höhe", "mm", 90, 10, 2000, 5),
+        ("neigung", "Neigung", "deg", 60, 10, 80, 5),
+        ("ueberstand", "Überstand", "mm", 3, 0, 50, 1),
+        ("zinnen_h", "Zinnenhöhe", "mm", 8, 2, 50, 1),
+        ("zinnen_b", "Zinnenbreite", "mm", 6, 2, 50, 1),
+        ("boden", "Boden", "bool", True, 0, 1, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5),
+        ("x", "X", "mm", 0, -5000, 5000, 5),
+        ("y", "Y", "mm", 0, -5000, 5000, 5),
+        ("z", "Z", "mm", 0, -5000, 5000, 5)]},
+    "kamin": {"label": "Schornstein", "fields": [
+        ("x", "von links", "mm", 20, -2000, 2000, 1),
+        ("y", "vor First", "mm", 10, -2000, 2000, 1),
+        ("breite", "Breite", "mm", 10, 4, 200, 1),
+        ("tiefe", "Tiefe", "mm", 10, 4, 200, 1),
+        ("hoehe", "über First", "mm", 10, 0, 300, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
 }
+
+
+WAND_TYPES = ("fenster", "tuer", "blende", "muster", "uhr", "pfeiler",
+              "band", "eckquader")
 
 
 def defaults(typ):
@@ -137,6 +247,26 @@ def plate_info(shape):
                 plate=bool(opp))
 
 
+def best_normal(shape, staerke, fallback):
+    """Plattennormale: die Flächennormale, entlang der der Körper eine
+    ganze Zahl Lagen dick ist (bei Gleichstand die dünnste Richtung)."""
+    v = _vertices(shape)
+    best, key = np.asarray(fallback, float), None
+    seen = []
+    for _f_, n, _a, _c in _planar_faces(shape):
+        if any(abs(np.dot(n, m)) > 0.999 for m in seen):
+            continue
+        seen.append(n)
+        d = v @ n
+        t = d.max() - d.min()
+        lagen = t / staerke
+        k = (round(abs(lagen - round(lagen)), 2) if round(lagen) >= 1 else 9,
+             t)
+        if key is None or k < key:
+            best, key = n, k
+    return best
+
+
 def _common(a, b):
     from OCP.BRepAlgoAPI import BRepAlgoAPI_Common
     op = BRepAlgoAPI_Common(a, b)
@@ -173,7 +303,7 @@ def _f(v):
 
 # --------------------------------------------------------- SolidCraft
 
-class Laser:
+class Laser(WandMixin, HausMixin):
     """Werkzeuge gegen einen McpClient (laufende App oder headless)."""
 
     def __init__(self, client, staerke=3.0, finger=10.0):
@@ -338,21 +468,6 @@ class Laser:
         return {"O": pl["origin"], "X": pl["x_dir"], "Y": pl["y_dir"],
                 "lines": lines}
 
-    def ctx_fenster(self):
-        sel = [x for x in self.selection() if x.get("type") == "face"]
-        if not sel:
-            raise RuntimeError("Wandfläche in SolidCraft anklicken")
-        f = sel[0]
-        wall = f["body"]
-        p = np.array(f.get("point") or [0, 0, 0], float)
-        s = self.shape(wall)
-        from .hosts import nearest_sub
-        face = nearest_sub(s, "face", tuple(p))
-        n = next(x[1] for x in _planar_faces(face))
-        right, up = _frame_up(n)
-        return {"wall": wall, "p": _f(p), "right": _f(right), "up": _f(up),
-                "thickness": round(plate_info(s)["thickness"], 4)}
-
     # -- Neubau aus Kontext + Werten → Befehle
 
     def cmds_kasten(self, name, ctx, p):
@@ -447,38 +562,6 @@ class Laser:
         return cmds, [ctx["plate"]], \
             f"{ctx['plate']}: Zone {width:.1f}×{length:.1f}, {len(rects)} Schlitze"
 
-    def cmds_fenster(self, name, ctx, p):
-        right, up = np.array(ctx["right"]), np.array(ctx["up"])
-        c = np.array(ctx["p"]) + right * p["x"] + up * p["y"]
-        B, H, R, sp = p["breite"], p["hoehe"], p["rahmen"], p["sprosse"]
-        w2, h2 = B / 2, H / 2
-        cmds = []
-        if p["oeffnung"]:
-            cmds += self._sketch_rects(c, right, up, [(-w2, -h2, w2, h2)],
-                                       f"{name} Öffnung Skizze")
-            cmds.append({"command": "solid.extrude", "params": {
-                "distance": round(ctx["thickness"] + 1, 4),
-                "direction": "negative", "operation": "cut",
-                "targets": [ctx["wall"]], "name": f"{name} Öffnung"}})
-        rects = [(-w2 - R, -h2 - R, w2 + R, h2 + R)]
-        nv, nh = int(p["sprossen_v"]), int(p["sprossen_h"])
-        pw = (B - nv * sp) / (nv + 1)
-        ph = (H - nh * sp) / (nh + 1)
-        if pw <= 0.2 or ph <= 0.2:
-            raise RuntimeError("Zu viele/zu breite Sprossen für das Fenster")
-        for i in range(nv + 1):
-            for j in range(nh + 1):
-                x0, y0 = -w2 + i * (pw + sp), -h2 + j * (ph + sp)
-                rects.append((x0, y0, x0 + pw, y0 + ph))
-        cmds += self._sketch_rects(c, right, up, rects, f"{name} Rahmen Skizze")
-        cmds.append({"command": "solid.extrude", "params": {
-            "distance": round(p["staerke"] * p["lagen"], 4),
-            "operation": "new", "body_name": f"{name} Rahmen",
-            "name": f"{name} Rahmen"}})
-        sprossen = f", Sprossen {nv}×{nh}" if nv or nh else ""
-        return cmds, [ctx["wall"], f"{name} Rahmen"], \
-            f"{B:g}×{H:g} auf {ctx['wall']}{sprossen}"
-
     # -- Elemente: Liste im Design, Neubau an derselben Timeline-Stelle
 
     def elements(self):
@@ -511,12 +594,17 @@ class Laser:
                   info=info)
         return el
 
+    def _ctx_for(self, typ):
+        if typ in WAND_TYPES:
+            return self.ctx_wand()
+        return getattr(self, "ctx_" + typ)()
+
     def create(self, typ, params, ctx=None):
         els = self.elements()
         p = defaults(typ)
         p.update(params or {})
         if ctx is None:
-            ctx = getattr(self, "ctx_" + typ)()
+            ctx = self._ctx_for(typ)
         el = {"id": f"{typ}-{int(time.time() * 1000)}", "typ": typ,
               "name": self._new_name(typ, els), "params": p, "ctx": ctx}
         self._build(el)
@@ -543,14 +631,27 @@ class Laser:
         if params:
             el["params"].update(params)
         if replace_ctx:
-            el["ctx"] = getattr(self, "ctx_" + el["typ"])()
+            el["ctx"] = self._ctx_for(el["typ"])
         self._rebuild(el)
+        self._save(els)                 # Abhängige lesen die neuen Werte
         extra = []
-        if el["typ"] == "kasten":                 # Zinken folgen dem Kasten
+        if el["typ"] in ("kasten", "haus"):      # Abhängiges zieht mit
             for z in els:
-                if z["typ"] == "zinken" and set(z["ctx"]["bodies"]) & set(
-                        el["bodies"]):
+                folgt = (
+                    (z["typ"] == "zinken"
+                     and set(z["ctx"]["bodies"]) & set(el["bodies"]))
+                    or (z["typ"] in ("band", "eckquader")
+                        and z["ctx"].get("kasten") == el["id"]
+                        and (z["typ"] == "eckquader"
+                             or z["params"].get("rundum")))
+                    or (z["typ"] == "kamin"
+                        and z["ctx"].get("haus") == el["id"])
+                    or (z["typ"] == "muster"
+                        and z["ctx"].get("kasten") == el["id"]
+                        and z["params"].get("bereich") == "flaeche"))
+                if folgt:
                     self._rebuild(z)
+                    self._save(els)
                     extra.append(z["name"])
         self._save(els)
         msg = f"{el['name']} neu: {el['info']}"
@@ -612,92 +713,123 @@ class Laser:
 
     # -- Export
 
-    def export_svg(self, ordner=None, platte=(400.0, 300.0), abstand=3.0):
-        """Alle sichtbaren Platten flach, verschachtelt, rot = schneiden."""
+    def _engravings(self):
+        """Körpername → [(ctx, linien in ctx-Koordinaten)] aller Gravuren."""
+        out = {}
+        for el in self.elements():
+            fn = getattr(self, "engr_" + el["typ"], None)
+            if fn is None:
+                continue
+            try:
+                for body, ctx, _off, lines in fn(el):
+                    out.setdefault(body, []).append((ctx, lines))
+            except Exception:                 # noqa: BLE001
+                continue
+        return out
+
+    def export(self, ordner=None, platte=(400.0, 300.0), abstand=3.0,
+               formate=("svg", "dxf")):
+        """Alle sichtbaren Platten flach und verschachtelt.
+        Rot = schneiden (Umriss + Durchbrüche aus dem Schnitt durch die
+        Plattenmitte), blau = gravieren (Musterlinien der Elemente)."""
+        from shapely.affinity import translate
+        from shapely.geometry import LineString
+
+        from .laser_wand import plate_section
         ordner = ordner or os.path.expanduser(
             "~/Downloads/Laser-Export/" + time.strftime("%Y-%m-%d_%H%M%S"))
         os.makedirs(ordner, exist_ok=True)
+        engr = self._engravings()
         teile, warn = [], []
         for name in self.body_names():
             s = self.shape(name)
             info = plate_info(s)
-            if info is None or not info["plate"]:
+            if info is None:
                 warn.append(f"{name}: keine Platte")
                 continue
-            if abs(info["thickness"] - self.staerke) > 0.05:
-                warn.append(f"{name}: {info['thickness']:.2f} mm statt "
-                            f"{self.staerke:g}")
-            teile.append((name, flat_outline(info)))
-        sheets = nest([p for _, p in teile], platte, abstand)
+            n = best_normal(s, self.staerke, info["normal"])
+            if name in engr:                      # Gravurseite nach oben
+                n = np.array(engr[name][0][0]["n"], float)
+            d = _vertices(s) @ n
+            t = float(d.max() - d.min())
+            right, up = _frame_up(n)
+            o = n * d.max()
+            geom = plate_section(s, n * (d.min() + d.max()) / 2, n, o,
+                                 right, up)
+            if geom.is_empty or abs(geom.area * t - _volume(s)) > \
+                    0.15 * _volume(s):
+                warn.append(f"{name}: keine ebene Platte")
+                continue
+            if abs(t - self.staerke) > 0.05:
+                lagen = t / self.staerke
+                warn.append(f"{name}: {t:.2f} mm" + (
+                    f" ({lagen:.0f} Lagen?)" if abs(lagen - round(lagen))
+                    < 0.05 else f" statt {self.staerke:g}"))
+            lines = []
+            inner = geom.buffer(-0.15)
+            for ctx, ls in engr.get(name, []):
+                P, R, U = (np.array(ctx[k], float)
+                           for k in ("p", "right", "up"))
+                for ln in ls:
+                    w = [P + R * x + U * y - o for x, y in ln]
+                    loc = [(float(q @ right), float(q @ up)) for q in w]
+                    if len(loc) >= 2:
+                        from .laser_geom import lines_of
+                        lines += lines_of(LineString(loc).intersection(inner))
+            x0, y0, _x1, _y1 = geom.bounds
+            geom = translate(geom, -x0, -y0)
+            lines = [[(x - x0, y - y0) for x, y in ln] for ln in lines]
+            teile.append((name, geom, lines))
+        sheets = nest(teile, platte, abstand)
         files = []
         for k, sheet in enumerate(sheets):
-            path = os.path.join(ordner, f"Platte {k + 1}.svg")
-            write_svg(path, platte, [(teile[i][0], polys, dx, dy)
-                                     for i, polys, dx, dy in sheet])
-            files.append(path)
-        msg = f"{len(teile)} Teile auf {len(sheets)} Platte(n) → {ordner}"
+            base = os.path.join(ordner, f"Platte {k + 1}")
+            if "svg" in formate:
+                write_svg(base + ".svg", platte, sheet)
+                files.append(base + ".svg")
+            if "dxf" in formate:
+                write_dxf(base + ".dxf", sheet)
+                files.append(base + ".dxf")
+        n_g = sum(len(ln) for _n, _g, ln in teile)
+        msg = (f"{len(teile)} Teile auf {len(sheets)} Platte(n), "
+               f"{n_g} Gravurlinien → {ordner}")
         if warn:
             msg += " · ⚠ " + "; ".join(warn)
         return msg, files
 
+    def export_svg(self, ordner=None, platte=(400.0, 300.0), abstand=3.0):
+        return self.export(ordner, platte, abstand)
+
 
 # ------------------------------------------------------------ Abwicklung
 
-def flat_outline(info):
-    """Umriss + Löcher der großen Fläche als 2D-Polylinien (mm)."""
-    from OCP.BRepAdaptor import BRepAdaptor_Curve
-    from OCP.BRepTools import BRepTools_WireExplorer
-    from OCP.GCPnts import GCPnts_QuasiUniformDeflection
-    from OCP.TopAbs import TopAbs_WIRE
-    from OCP.TopExp import TopExp_Explorer
-    from OCP.TopoDS import TopoDS
-    n = info["normal"]
-    right, up = _frame_up(n)
-    polys = []
-    exp = TopExp_Explorer(info["face"], TopAbs_WIRE)
-    while exp.More():
-        w = TopoDS.Wire_s(exp.Current())
-        pts = []
-        we = BRepTools_WireExplorer(w)
-        while we.More():
-            c = BRepAdaptor_Curve(we.Current())
-            d = GCPnts_QuasiUniformDeflection(c, 0.01)
-            seg = [c.Value(d.Parameter(i)) for i in range(1, d.NbPoints() + 1)]
-            seg = [np.array([q.X(), q.Y(), q.Z()]) for q in seg]
-            from OCP.TopAbs import TopAbs_REVERSED
-            if we.Current().Orientation() == TopAbs_REVERSED:
-                seg.reverse()
-            pts += [(float(q @ right), float(q @ up)) for q in seg]
-            we.Next()
-        if pts:
-            pts.append(pts[0])
-            polys.append(pts)
-        exp.Next()
-    allp = np.array([p for pl in polys for p in pl])
-    lo = allp.min(0)
-    return [[(x - lo[0], y - lo[1]) for x, y in pl] for pl in polys]
-
-
-def nest(parts, platte, gap):
-    """Regal-Packen nach Höhe. → [[(index, polys, dx, dy)], …] je Platte."""
+def nest(teile, platte, gap):
+    """Regal-Packen nach Höhe → je Platte [(name, geom, linien), …]
+    (schon verschoben, ggf. um 90° gedreht)."""
+    from shapely.affinity import rotate, translate
     W, H = platte
-    sizes = []
-    for i, polys in enumerate(parts):
-        a = np.array([p for pl in polys for p in pl])
-        w, h = a.max(0)
-        if w > h and w > W - 2 * gap:                 # hochkant drehen
-            polys = [[(y, w - x) for x, y in pl] for pl in polys]
-            w, h = h, w
-        sizes.append((i, polys, w, h))
-    sizes.sort(key=lambda x: -x[3])
+    items = []
+    for name, g, lines in teile:
+        x0, y0, x1, y1 = g.bounds
+        w, h = x1 - x0, y1 - y0
+        if (w > h and w > W - 2 * gap) or h > H - 2 * gap:
+            g = rotate(g, 90, origin=(0, 0))
+            lines = [[(-y, x) for x, y in ln] for ln in lines]
+            x0, y0, x1, y1 = g.bounds
+            g = translate(g, -x0, -y0)
+            lines = [[(x - x0, y - y0) for x, y in ln] for ln in lines]
+            w, h = x1 - x0, y1 - y0
+        items.append((name, g, lines, w, h))
+    items.sort(key=lambda it: -it[4])
     sheets, cur, x, y, row = [], [], gap, gap, 0.0
-    for i, polys, w, h in sizes:
+    for name, g, lines, w, h in items:
         if x + w > W - gap:
             x, y, row = gap, y + row + gap, 0.0
-        if y + h > H - gap:
+        if y + h > H - gap and cur:
             sheets.append(cur)
             cur, x, y, row = [], gap, gap, 0.0
-        cur.append((i, polys, x, y))
+        cur.append((name, translate(g, x, y),
+                    [[(px + x, py + y) for px, py in ln] for ln in lines]))
         x += w + gap
         row = max(row, h)
     if cur:
@@ -705,23 +837,55 @@ def nest(parts, platte, gap):
     return sheets
 
 
+def _loops(g):
+    from .laser_geom import polys_of
+    for outer, holes in polys_of(g):
+        yield outer
+        yield from holes
+
+
 def write_svg(path, platte, placed):
     W, H = platte
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}mm" '
-           f'height="{H}mm" viewBox="0 0 {W} {H}">']
-    for name, polys, dx, dy in placed:
-        out.append(f'<g id="{name}">')
-        for pl in polys:
-            d = " ".join(f"{'M' if k == 0 else 'L'}{x + dx:.3f},"
-                         f"{H - (y + dy):.3f}" for k, (x, y) in enumerate(pl))
-            out.append(f'<path d="{d} Z" fill="none" stroke="#FF0000" '
-                       f'stroke-width="0.1"/>')
-        a = np.array([p for pl in polys for p in pl])
-        cx, cy = a.mean(0)
-        out.append(f'<text x="{cx + dx:.2f}" y="{H - (cy + dy):.2f}" '
-                   f'font-size="3" fill="#0000FF" text-anchor="middle">'
-                   f'{name}</text>')
-        out.append("</g>")
-    out.append("</svg>")
+           f'height="{H}mm" viewBox="0 0 {W} {H}">',
+           '<g id="schneiden" fill="none" stroke="#FF0000" '
+           'stroke-width="0.1">']
+    for name, g, _l in placed:
+        for loop in _loops(g):
+            d = " ".join(f"{'M' if k == 0 else 'L'}{x:.3f},{H - y:.3f}"
+                         for k, (x, y) in enumerate(loop))
+            out.append(f'<path d="{d} Z"/>')
+    out.append('</g><g id="gravieren" fill="none" stroke="#0000FF" '
+               'stroke-width="0.1">')
+    for name, _g, lines in placed:
+        for ln in lines:
+            d = " ".join(f"{'M' if k == 0 else 'L'}{x:.3f},{H - y:.3f}"
+                         for k, (x, y) in enumerate(ln))
+            out.append(f'<path d="{d}"/>')
+    out.append('</g><g id="info" fill="#999999" font-size="2.5">')
+    for name, g, _l in placed:
+        p = g.representative_point()
+        out.append(f'<text x="{p.x:.2f}" y="{H - p.y:.2f}" '
+                   f'text-anchor="middle">{name}</text>')
+    out.append("</g></svg>")
     with open(path, "w", encoding="utf-8") as fh:
         fh.write("\n".join(out))
+
+
+def write_dxf(path, placed):
+    import ezdxf
+    doc = ezdxf.new("R2010", setup=True)
+    doc.units = ezdxf.units.MM
+    for nm, col in (("SCHNITT", 1), ("GRAVUR", 5), ("INFO", 8)):
+        doc.layers.add(nm, color=col)
+    msp = doc.modelspace()
+    for name, g, lines in placed:
+        for loop in _loops(g):
+            msp.add_lwpolyline(loop, close=True,
+                               dxfattribs={"layer": "SCHNITT"})
+        for ln in lines:
+            msp.add_lwpolyline(ln, dxfattribs={"layer": "GRAVUR"})
+        p = g.representative_point()
+        msp.add_text(name, height=2.5, dxfattribs={
+            "layer": "INFO", "insert": (p.x, p.y)})
+    doc.saveas(path)

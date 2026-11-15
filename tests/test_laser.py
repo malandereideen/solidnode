@@ -35,7 +35,7 @@ def test_kasten_zinken_exakt_ohne_ueberlappung(laser):
     inter = json.loads(c.execute("inspect.interference", {}))
     assert inter["count"] == 0
     msg, files = L.export_svg(ordner=str(tmp / "exp"))
-    assert msg.startswith("6 Teile") and len(files) == 1
+    assert msg.startswith("6 Teile") and len(files) == 2
 
 
 def test_fenster_und_hinge(laser):
@@ -82,3 +82,54 @@ def test_elemente_aendern_speichern_loeschen(laser):
     assert set(L.status(els).values()) == {"ok"}
     L.delete(f)
     assert abs(_total(c) - (120 * 80 * 80 - 114 * 74 * 77)) < 0.01
+
+
+def _sel(c, body, pt):
+    c.execute("select.set", {"items": [{"type": "face", "body": body,
+                                        "point": pt}]})
+
+
+def test_wandelemente_und_export(laser):
+    L, c, tmp = laser
+    L.kasten(140, 90, 80)
+    L.zinken()
+    _sel(c, "Kasten 1 Front", [70, 0, 40])        # liegt auf einer Fuge
+    L.create("muster", {"muster": "backstein"})
+    _sel(c, "Kasten 1 Front", [70, 0, 40])
+    for form, x in (("bogen", -40), ("spitz", 40), ("rund", 0)):
+        L.create("fenster", {"form": form, "breite": 12, "hoehe": 20,
+                             "x": x, "y": 12})
+    L.create("tuer", {})
+    L.create("uhr", {"x": 40, "y": -20})
+    L.create("band", {"art": "sockel", "hoehe": 4})
+    L.create("band", {"art": "fries", "z": 66, "hoehe": 6})
+    L.create("eckquader", {})
+    assert not [x for x in L.design()["timeline"] if x.get("error")]
+    fr = next(b for b in json.loads(c.tool("measure", {"summary": True}))[
+        "bodies"] if b["name"] == "Fenster 1 Rahmen")
+    assert abs(fr["bbox"]["max"][1] - 0) < 0.01     # vor der Front, stehend
+    assert fr["bbox"]["max"][2] - fr["bbox"]["min"][2] > 20
+    msg, files = L.export(ordner=str(tmp / "exp"))
+    assert "⚠" not in msg, msg
+    assert len(files) == 2 and files[1].endswith(".dxf")
+    svg = open(files[0], encoding="utf-8").read()
+    assert svg.count('stroke="#0000FF"') == 1 and svg.count("<path") > 500
+
+
+def test_haus_turm_ohne_durchdringung(laser):
+    from solidnode.laser import _common, _volume
+    L, c, _ = laser
+    L.create("haus", {"dach": "sattel"})
+    L.zinken([b for b in L.body_names() if b.startswith("Haus 1")])
+    L.create("kamin", {}, {"haus": L.elements()[0]["id"]})
+    L.create("haus", {"dach": "walm", "x": 150, "neigung": 40,
+                      "boden": False})
+    L.create("turm", {"x": 0, "y": 150})
+    assert not [x for x in L.design()["timeline"] if x.get("error")]
+    names = L.body_names()
+    shapes = {n: L.shape(n) for n in names
+              if n.startswith(("Haus 1 Dach", "Haus 2 Dach", "Turm 1"))}
+    ks = list(shapes)
+    for i, a in enumerate(ks):
+        for b in ks[i + 1:]:
+            assert _volume(_common(shapes[a], shapes[b])) < 0.01, (a, b)

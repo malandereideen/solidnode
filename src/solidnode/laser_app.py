@@ -12,16 +12,60 @@ import subprocess
 import sys
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QApplication, QCheckBox, QDoubleSpinBox,
-                               QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-                               QPushButton, QSpinBox, QTabWidget, QTreeWidget,
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox,
+                               QDoubleSpinBox, QFormLayout, QGroupBox,
+                               QHBoxLayout, QLabel, QPushButton,
+                               QSpinBox, QTabWidget, QTreeWidget,
                                QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from . import hosts
-from .laser import SCHEMA, Laser, defaults
+from .laser import SCHEMA, WAND_TYPES, Laser, defaults
+
+
+# Baukasten wie im bausatzmaker: (Gruppe, Name, Typ, Voreinstellung, Hinweis)
+_WAND = "Wandfläche anklicken"
+KATALOG = [
+    ("Baukörper", "Kasten", "kasten", {}, "Wird bei X/Y/Z angelegt."),
+    ("Baukörper", "Haus", "haus", {}, "Wird bei X/Y/Z angelegt; danach "
+     "Zinken für die Wände."),
+    ("Baukörper", "Turm (Vieleck)", "turm", {}, "Wird bei X/Y/Z angelegt."),
+    ("Baukörper", "Schornstein", "kamin", {}, "Haus anklicken (sonst das "
+     "zuletzt angelegte)."),
+    ("Öffnungen", "Fenster", "fenster", {}, _WAND + " (Fenstermitte)."),
+    ("Öffnungen", "Tür", "tuer", {}, _WAND + " (Türmitte; unten sitzt sie "
+     "auf der Wandkante bzw. dem Boden)."),
+    ("Öffnungen", "Tor", "tuer", {"blatt": False, "breite": 26, "hoehe": 30,
+                                   "rahmen": 3}, _WAND + " (Tormitte)."),
+    ("Blenden", "Blende", "blende", {}, _WAND + " (Mitte)."),
+    ("Blenden", "Nischenreihe", "blende", {"anzahl": 5, "breite": 5,
+                                           "hoehe": 11, "abstand": 9},
+     _WAND + " (Mitte der Reihe)."),
+    ("Muster", "Muster (Gravur)", "muster", {}, _WAND + ". Bereich „feld“ = "
+     "Feld um den Klickpunkt, sonst die ganze Fläche."),
+    ("Bänder", "Gesims", "band", {"art": "gesims"}, _WAND + "; rundum = "
+     "alle vier Wände des Kastens/Hauses."),
+    ("Bänder", "Sockel", "band", {"art": "sockel", "hoehe": 4}, _WAND + "."),
+    ("Bänder", "Traufgesims", "band", {"art": "trauf"}, _WAND + "."),
+    ("Bänder", "Rundbogenfries", "band", {"art": "fries", "hoehe": 6},
+     _WAND + "."),
+    ("Schmuck", "Eckquader", "eckquader", {}, "Eine Wand des Kastens/Hauses "
+     "anklicken."),
+    ("Schmuck", "Strebepfeiler", "pfeiler", {}, _WAND + " (Pfeilermitte)."),
+    ("Schmuck", "Uhr", "uhr", {}, _WAND + " (Uhrmitte)."),
+    ("Platten", "Zinken", "zinken", {}, "Platten auswählen — oder nichts, "
+     "dann alle Stöße."),
+    ("Platten", "Living Hinge", "hinge", {}, "Biegelinie (oder Rechteck) auf "
+     "die Platte skizzieren und auswählen."),
+]
+_VERSTECKT = {"x", "y", "z"}        # Lage kommt beim Anlegen vom Klick
 
 
 def _field(kind, value, lo, hi, step):
+    if kind == "choice":
+        w = QComboBox()
+        w.addItems(list(lo))
+        w.setCurrentText(str(value))
+        return w
     if kind == "bool":
         w = QCheckBox()
         w.setChecked(bool(value))
@@ -44,6 +88,8 @@ def _field(kind, value, lo, hi, step):
 def _value(w):
     if isinstance(w, QCheckBox):
         return w.isChecked()
+    if isinstance(w, QComboBox):
+        return w.currentText()
     return w.value()
 
 
@@ -65,6 +111,8 @@ class Form:
                 continue
             w = _field(kind, vals.get(key, _d), lo, hi, step)
             self.widgets[key] = w
+            if kind in ("bool", "choice") and n % cols:
+                n += cols - n % cols            # eigene Zeile
             if kind == "bool":
                 w.setText(label)
                 f.addRow(w)
@@ -146,32 +194,26 @@ class Palette(QWidget):
         lay = QVBoxLayout(w)
         lay.setContentsMargins(4, 4, 4, 4)
         lay.setSpacing(4)
-        v = self._group(lay, "Kasten")
-        self.f_kasten = Form("kasten", keys=["breite", "tiefe", "hoehe",
-                                             "deckel"], cols=3)
-        v.addWidget(self.f_kasten.box)
-        v.addWidget(self._btn("Kasten anlegen", self.do_kasten))
-
-        v = self._group(lay, "Zinken", "Platten überlappen lassen.")
-        row = QHBoxLayout()
-        row.addWidget(self._btn("Auswahl", lambda: self.do_zinken(True)))
-        row.addWidget(self._btn("Alle Stöße", lambda: self.do_zinken(False)))
-        v.addLayout(row)
-
-        v = self._group(lay, "Living Hinge", "Biegelinie (oder Rechteck) "
-                        "auf die Platte skizzieren und auswählen.")
-        self.f_hinge = Form("hinge", keys=["radius", "winkel", "schnitt",
-                                           "steg", "abstand", "schlitz"])
-        v.addWidget(self.f_hinge.box)
-        v.addWidget(self._btn("Hinge schneiden", self.do_hinge))
-
-        v = self._group(lay, "Fenster", "Wandfläche an der Fenstermitte "
-                        "anklicken.")
-        self.f_fenster = Form("fenster", keys=[
-            "breite", "hoehe", "rahmen", "sprosse", "sprossen_v",
-            "sprossen_h", "oeffnung"])
-        v.addWidget(self.f_fenster.box)
-        v.addWidget(self._btn("Fenster setzen", self.do_fenster))
+        self.kat = QComboBox()
+        gruppe = None
+        for i, (g, name, _t, _p, _h) in enumerate(KATALOG):
+            if g != gruppe:
+                if gruppe is not None:
+                    self.kat.insertSeparator(self.kat.count())
+                gruppe = g
+            self.kat.addItem(f"{g} · {name}", i)
+        self.kat.currentIndexChanged.connect(self.show_neu)
+        lay.addWidget(self.kat)
+        self.hint = QLabel("")
+        self.hint.setWordWrap(True)
+        self.hint.setStyleSheet("color: #999;")
+        lay.addWidget(self.hint)
+        self.neu_box = QWidget()
+        self.neu_lay = QVBoxLayout(self.neu_box)
+        self.neu_lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(self.neu_box)
+        self.neu_form = None
+        lay.addWidget(self._btn("Anlegen", self.do_neu))
 
         v = self._group(lay, "Export")
         row = QHBoxLayout()
@@ -181,9 +223,28 @@ class Palette(QWidget):
         row.addWidget(self.pw)
         row.addWidget(self.ph)
         v.addLayout(row)
-        v.addWidget(self._btn("SVG für xTool", self.do_export))
+        v.addWidget(self._btn("SVG + DXF für xTool", self.do_export))
         lay.addStretch(1)
+        self.show_neu()
         return w
+
+    def show_neu(self):
+        while self.neu_lay.count():
+            it = self.neu_lay.takeAt(0).widget()
+            if it:
+                it.setParent(None)
+                it.deleteLater()
+        _g, _n, typ, preset, hint = KATALOG[self.kat.currentData() or 0]
+        vals = dict(preset)
+        vals.setdefault("staerke", self.staerke.value())
+        if typ == "zinken":
+            vals.setdefault("zinke", self.finger.value())
+        keys = [f[0] for f in SCHEMA[typ]["fields"]
+                if not (f[0] in _VERSTECKT and typ in WAND_TYPES)
+                and f[0] not in ("staerke",)]
+        self.neu_form = Form(typ, vals, keys=keys)
+        self.neu_lay.addWidget(self.neu_form.box)
+        self.hint.setText(hint)
 
     def _tab_elemente(self):
         w = QWidget()
@@ -252,26 +313,18 @@ class Palette(QWidget):
 
     # -- Neu
 
-    def _mat(self, p):
+    def do_neu(self):
+        _g, name, typ, preset, _h = KATALOG[self.kat.currentData() or 0]
+        p = dict(preset)
+        p.update(self.neu_form.values())
         p["staerke"] = self.staerke.value()
-        return p
 
-    def do_kasten(self):
-        self.run("Kasten", lambda L: L.create(
-            "kasten", self._mat(self.f_kasten.values())))
-
-    def do_zinken(self, auswahl):
-        self.run("Zinken", lambda L: L.create(
-            "zinken", {"zinke": self.finger.value()},
-            L.ctx_zinken(None if auswahl else L.body_names())))
-
-    def do_hinge(self):
-        self.run("Living Hinge", lambda L: L.create(
-            "hinge", self.f_hinge.values()))
-
-    def do_fenster(self):
-        self.run("Fenster", lambda L: L.create(
-            "fenster", self._mat(self.f_fenster.values())))
+        def fn(L):
+            ctx = None
+            if typ == "zinken":
+                ctx = L.ctx_zinken()
+            return L.create(typ, p, ctx)
+        self.run(name, fn)
 
     def do_export(self):
         def fn(L):
@@ -319,6 +372,7 @@ class Palette(QWidget):
         while self.edit_lay.count():
             w = self.edit_lay.takeAt(0).widget()
             if w:
+                w.setParent(None)
                 w.deleteLater()
         el = self.current()
         self.edit_form = None
@@ -373,6 +427,6 @@ def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     app = QApplication.instance() or QApplication(sys.argv[:1])
     w = Palette(headless="--headless" in argv)
-    w.resize(320, 10)
+    w.resize(360, 10)
     w.show()
     sys.exit(app.exec())

@@ -26,6 +26,8 @@ dependencies = [
     "NodeGraphQt>=0.6.44",
     "setuptools",          # NodeGraphQt still imports distutils
     "numpy>=1.26",
+    "shapely>=2.0",        # Laser-Palette: Flächen, Muster, Abwicklung
+    "ezdxf>=1.1",          # Laser-Palette: DXF-Export
 ]
 
 [project.optional-dependencies]
