@@ -133,3 +133,18 @@ def test_haus_turm_ohne_durchdringung(laser):
     for i, a in enumerate(ks):
         for b in ks[i + 1:]:
             assert _volume(_common(shapes[a], shapes[b])) < 0.01, (a, b)
+
+
+def test_gravur_standard_nur_skizze_und_schalter(laser):
+    L, c, _ = laser
+    rillen = lambda: [f for f in L.design()["timeline"]  # noqa: E731
+                      if f["name"].endswith(" Gravur")]
+    L.kasten(120, 80, 60)
+    _sel(c, "Kasten 1 Front", [60, 0, 30])
+    L.create("muster", {"muster": "backstein"})
+    v0 = _total(c)
+    assert not rillen() and not L.gravur_sichtbar()
+    L.set_gravur(True)
+    assert len(rillen()) == 1 and _total(c) < v0
+    L.set_gravur(False)
+    assert not rillen() and abs(_total(c) - v0) < 0.01

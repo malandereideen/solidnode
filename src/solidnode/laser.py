@@ -564,13 +564,39 @@ class Laser(WandMixin, HausMixin):
 
     # -- Elemente: Liste im Design, Neubau an derselben Timeline-Stelle
 
-    def elements(self):
+    def _meta(self):
         meta = json.loads(self.c.execute("document.metadata", {}))
-        return (meta.get("metadata", {}).get(META) or {}).get("elements", [])
+        return dict(meta.get("metadata", {}).get(META) or {})
 
-    def _save(self, els):
-        self.c.execute("document.metadata.set",
-                       {"key": META, "value": {"elements": els}})
+    def elements(self):
+        return self._meta().get("elements", [])
+
+    def _save(self, els=None, **extra):
+        m = self._meta()
+        if els is not None:
+            m["elements"] = els
+        m.update(extra)
+        self.c.execute("document.metadata.set", {"key": META, "value": m})
+
+    # -- Gravur: Standard nur Skizzenlinien, Rillen per Schalter
+
+    def gravur_sichtbar(self):
+        return bool(self._meta().get("gravur", False))
+
+    def set_gravur(self, an):
+        """Schalter: Elemente mit Gravur einmal neu bauen — mit Rillen
+        (Extrusion) oder nur mit den Skizzenlinien."""
+        self._save(gravur=bool(an))
+        els = self.elements()
+        n = 0
+        for el in els:
+            if getattr(self, "engr_" + el["typ"], None) and \
+                    self.engr_has(el):
+                self._rebuild(el)
+                n += 1
+        self._save(els)
+        return (f"Gravur als Rillen: {n} Muster eingeschaltet" if an else
+                f"Gravur nur als Skizze: {n} Muster ausgeschaltet")
 
     def _timeline(self):
         return self.design()["timeline"]
@@ -581,8 +607,15 @@ class Laser(WandMixin, HausMixin):
                 if e["typ"] == typ and e["name"].rsplit(" ", 1)[-1].isdigit()]
         return f"{label} {max(nums, default=0) + 1}"
 
+    def engr_has(self, el):
+        try:
+            return any(ln for *_x, ln in getattr(self, "engr_" + el["typ"])(el))
+        except Exception:                     # noqa: BLE001
+            return False
+
     def _build(self, el):
         """Befehle laufen an der Timeline-Marke; neue Features → Ordner."""
+        self._rillen = self.gravur_sichtbar()
         before = {f["id"] for f in self._timeline()}
         cmds, bodies, info = getattr(self, "cmds_" + el["typ"])(
             el["name"], el["ctx"], el["params"])

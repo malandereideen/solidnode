@@ -152,6 +152,12 @@ class Palette(QWidget):
         g.addWidget(QLabel("Zinke"))
         g.addWidget(self.finger, 1)
         root.addLayout(g)
+        self.rillen = QCheckBox("Gravur als Rillen zeigen (langsamer)")
+        self.rillen.setToolTip("Aus: Muster nur als Skizzenlinien — schnell, "
+                               "der Export ist gleich.\nAn: echte 0,2-mm-"
+                               "Rillen für Ansicht/Render.")
+        self.rillen.toggled.connect(self.do_rillen)
+        root.addWidget(self.rillen)
 
         self.tabs = QTabWidget()
         root.addWidget(self.tabs)
@@ -311,6 +317,9 @@ class Palette(QWidget):
             self.refresh(quiet=True)
         return ok
 
+    def do_rillen(self, an):
+        self.run("Gravur", lambda L: L.set_gravur(an))
+
     # -- Neu
 
     def do_neu(self):
@@ -343,6 +352,9 @@ class Palette(QWidget):
 
         def fn(L):
             self.els = L.elements()
+            self.rillen.blockSignals(True)
+            self.rillen.setChecked(L.gravur_sichtbar())
+            self.rillen.blockSignals(False)
             st = L.status(self.els)
             self.tree.blockSignals(True)
             self.tree.clear()

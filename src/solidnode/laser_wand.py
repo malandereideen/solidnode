@@ -19,6 +19,7 @@ from shapely.ops import unary_union
 from . import laser_geom as G
 
 GROOVE_DEPTH = 0.2
+GRAVUR = " Gravur"          # Namensendung der Rillen-Features (Schalter)
 GROOVE_WIDTH = 0.3
 
 
@@ -218,10 +219,13 @@ class WandMixin:
             return []
         cmds = self._sketch(ctx, f"{name} Skizze", lines=lines,
                             offset=offset)
+        if not getattr(self, "_rillen", False):
+            return cmds                         # nur Linien (schnell)
         cmds.append({"command": "solid.extrude", "params": {
             "thin": True, "thickness": _r(linie or GROOVE_WIDTH),
             "distance": _r(tiefe or GROOVE_DEPTH), "direction": "negative",
-            "operation": "cut", "targets": [target], "name": name}})
+            "operation": "cut", "targets": [target],
+            "name": name + GRAVUR}})
         return cmds
 
     def _cut_through(self, ctx, name, geom):
