@@ -148,3 +148,36 @@ def test_gravur_standard_nur_skizze_und_schalter(laser):
     assert len(rillen()) == 1 and _total(c) < v0
     L.set_gravur(False)
     assert not rillen() and abs(_total(c) - v0) < 0.01
+
+
+def test_gaube_vordach_rundturm(laser):
+    from solidnode.laser import _common, _volume
+    L, c, tmp = laser
+    L.create("haus", {"dach": "sattel", "breite": 120, "tiefe": 80,
+                      "hoehe": 60})
+    hid = L.elements()[0]["id"]
+    L.create("gaube", {"x": 35}, {"haus": hid, "seite": "vorn"})
+    L.create("gaube", {"x": 60}, {"haus": hid, "seite": "hinten"})
+    _sel(c, "Haus 1 Seite rechts", [120, 40, 20])
+    L.create("vordach", {"breite": 50, "z": 35})
+    L.create("rundturm", {"x": -40, "y": 40})
+    L.create("rundturm", {"x": -40, "y": 110, "dach": "zinnen",
+                          "durchmesser": 36})
+    assert not [x for x in L.design()["timeline"] if x.get("error")]
+    sh = {n: L.shape(n) for n in L.body_names()
+          if n.startswith(("Gaube", "Vordach", "Rundturm", "Haus 1 Dach"))}
+    ks = list(sh)
+    for i, a in enumerate(ks):
+        for b in ks[i + 1:]:
+            assert _volume(_common(sh[a], sh[b])) < 0.01, (a, b)
+    # Gauben ziehen mit, wenn das Haus höher wird
+    assert "Gaube 1" in L.edit(hid, {"hoehe": 70})
+    msg, _files = L.export(ordner=str(tmp / "exp"))
+    assert "⚠" not in msg, msg
+    flats = [n for n, *_ in [(e,) for e in ("Rundturm 1 Mantel",
+                                            "Rundturm 1 Kegeldach",
+                                            "Rundturm 2 Mantel")]]
+    svg = "".join(open(f, encoding="utf-8").read() for f in _files
+                  if f.endswith(".svg"))
+    for n in flats:
+        assert f">{n}<" in svg

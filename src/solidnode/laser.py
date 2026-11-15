@@ -24,6 +24,7 @@ import numpy as np
 
 from .hosts import UEBERGABE, sc_read_step
 from .laser_geom import FORMEN, MUSTER
+from .laser_extra import ExtraMixin
 from .laser_haus import HausMixin
 from .laser_wand import WandMixin
 
@@ -166,11 +167,46 @@ SCHEMA = {
         ("tiefe", "Tiefe", "mm", 10, 4, 200, 1),
         ("hoehe", "über First", "mm", 10, 0, 300, 1),
         ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "gaube": {"label": "Gaube", "fields": [
+        ("x", "von links", "mm", 30, -2000, 2000, 1),
+        ("breite", "Breite", "mm", 14, 6, 300, 1),
+        ("hoehe", "Höhe", "mm", 10, 3, 200, 1),
+        ("tiefe", "ab Traufe", "mm", 8, 0, 500, 1),
+        ("neigung", "Neigung", "deg", 45, 15, 70, 5),
+        ("fenster", "Fenster", "bool", True, 0, 1, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "vordach": {"label": "Vordach", "fields": [
+        ("x", "← →", "mm", 0.0, -2000, 2000, 1),
+        ("z", "Höhe ab", "mm", 30.0, 3, 2000, 1),
+        ("breite", "Breite", "mm", 40.0, 10, 1000, 1),
+        ("tiefe", "Tiefe", "mm", 20.0, 5, 300, 1),
+        ("neigung", "Neigung", "deg", 12, 0, 45, 1),
+        ("stuetzen", "Stützen", "bool", True, 0, 1, 1),
+        ("volant", "Volant", "bool", True, 0, 1, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5)]},
+    "rundturm": {"label": "Rundturm", "fields": [
+        ("dach", "Dach", "choice", "kegel", ["kegel", "zinnen", "flach"],
+         None, None),
+        ("durchmesser", "Ø", "mm", 44, 10, 1000, 2),
+        ("hoehe", "Höhe", "mm", 80, 10, 2000, 5),
+        ("neigung", "Neigung", "deg", 60, 20, 80, 5),
+        ("ueberstand", "Überstand", "mm", 3, 0, 30, 1),
+        ("zinnen_h", "Zinnenhöhe", "mm", 8, 2, 50, 1),
+        ("zinnen_b", "Zinnenbreite", "mm", 6, 2, 50, 1),
+        ("schnitt", "Schnitt", "mm", 15.0, 3, 100, 1),
+        ("steg", "Steg", "mm", 3.0, 1, 20, 0.5),
+        ("abstand", "Abstand", "mm", 1.5, 0.5, 10, 0.25),
+        ("schlitz", "Schlitz", "mm", 0.5, 0.1, 3, 0.1),
+        ("boden", "Boden", "bool", True, 0, 1, 1),
+        ("staerke", "Stärke", "mm", 3.0, 0.5, 20, 0.5),
+        ("x", "X", "mm", 0, -5000, 5000, 5),
+        ("y", "Y", "mm", 0, -5000, 5000, 5),
+        ("z", "Z", "mm", 0, -5000, 5000, 5)]},
 }
 
 
 WAND_TYPES = ("fenster", "tuer", "blende", "muster", "uhr", "pfeiler",
-              "band", "eckquader")
+              "band", "eckquader", "vordach")
 
 
 def defaults(typ):
@@ -303,7 +339,7 @@ def _f(v):
 
 # --------------------------------------------------------- SolidCraft
 
-class Laser(WandMixin, HausMixin):
+class Laser(WandMixin, HausMixin, ExtraMixin):
     """Werkzeuge gegen einen McpClient (laufende App oder headless)."""
 
     def __init__(self, client, staerke=3.0, finger=10.0):
@@ -677,7 +713,7 @@ class Laser(WandMixin, HausMixin):
                         and z["ctx"].get("kasten") == el["id"]
                         and (z["typ"] == "eckquader"
                              or z["params"].get("rundum")))
-                    or (z["typ"] == "kamin"
+                    or (z["typ"] in ("kamin", "gaube")
                         and z["ctx"].get("haus") == el["id"])
                     or (z["typ"] == "muster"
                         and z["ctx"].get("kasten") == el["id"]
@@ -773,8 +809,22 @@ class Laser(WandMixin, HausMixin):
             "~/Downloads/Laser-Export/" + time.strftime("%Y-%m-%d_%H%M%S"))
         os.makedirs(ordner, exist_ok=True)
         engr = self._engravings()
-        teile, warn = [], []
+        teile, warn, flach = [], [], set()
+        for el in self.elements():               # gebogene Teile abwickeln
+            fn = getattr(self, "flat_" + el["typ"], None)
+            if fn is None:
+                continue
+            for nm, g, lines in fn(el):
+                if g.is_empty:
+                    continue
+                x0, y0, _x1, _y1 = g.bounds
+                teile.append((nm, translate(g, -x0, -y0),
+                              [[(x - x0, y - y0) for x, y in ln]
+                               for ln in lines]))
+                flach.add(nm)
         for name in self.body_names():
+            if name in flach:
+                continue
             s = self.shape(name)
             info = plate_info(s)
             if info is None:

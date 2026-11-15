@@ -31,6 +31,10 @@ KATALOG = [
     ("Baukörper", "Turm (Vieleck)", "turm", {}, "Wird bei X/Y/Z angelegt."),
     ("Baukörper", "Schornstein", "kamin", {}, "Haus anklicken (sonst das "
      "zuletzt angelegte)."),
+    ("Baukörper", "Rundturm (gebogen)", "rundturm", {}, "Wird bei X/Y/Z "
+     "angelegt; der Mantel kommt im Export als Streifen mit Living Hinge."),
+    ("Dach", "Gaube", "gaube", {}, "Dachfläche des Hauses anklicken "
+     "(vorn/hinten); „von links“ = Mitte der Gaube."),
     ("Öffnungen", "Fenster", "fenster", {}, _WAND + " (Fenstermitte)."),
     ("Öffnungen", "Tür", "tuer", {}, _WAND + " (Türmitte; unten sitzt sie "
      "auf der Wandkante bzw. dem Boden)."),
@@ -52,12 +56,14 @@ KATALOG = [
      "anklicken."),
     ("Schmuck", "Strebepfeiler", "pfeiler", {}, _WAND + " (Pfeilermitte)."),
     ("Schmuck", "Uhr", "uhr", {}, _WAND + " (Uhrmitte)."),
+    ("Schmuck", "Vordach", "vordach", {}, _WAND + " (Mitte); „Höhe ab“ = "
+     "Anschlusshöhe über der Wandunterkante."),
     ("Platten", "Zinken", "zinken", {}, "Platten auswählen — oder nichts, "
      "dann alle Stöße."),
     ("Platten", "Living Hinge", "hinge", {}, "Biegelinie (oder Rechteck) auf "
      "die Platte skizzieren und auswählen."),
 ]
-_VERSTECKT = {"x", "y", "z"}        # Lage kommt beim Anlegen vom Klick
+_VERSTECKT = {"x", "y"}        # Lage kommt beim Anlegen vom Klick
 
 
 def _field(kind, value, lo, hi, step):
