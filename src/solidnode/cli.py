@@ -60,6 +60,10 @@ def doctor():
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0] == "laser":
+        from . import laser_app
+        laser_app.main(argv[1:])
+        return 0
     if argv and argv[0] in ("install-serpentine-plugin", "doctor", "update",
                             "-h", "--help", "--version"):
         p = argparse.ArgumentParser(prog="solidnode",
