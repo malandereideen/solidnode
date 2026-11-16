@@ -1431,6 +1431,7 @@ def make_core():
         "LivingHingeNode": "┆", "KerfNode": "◫", "VerschachtelnNode": "⊞",
         "SvgExportNode": "svg", "SchlitzeNode": "‖",
         "KonturschnittNode": "≡", "WaffelNode": "♯",
+        "RippenReliefNode": "⫼",
         "DruckCheckNode": "✓", "AufBettNode": "⊥", "ToleranzPaarNode": "⊘",
         "GitterNode": "▦", "GyroidNode": "≈", "GewindeNode": "≀",
         "PraegenNode": "Aa", "MehrfarbNode": "▥",

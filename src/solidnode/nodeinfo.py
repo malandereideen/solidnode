@@ -79,6 +79,9 @@ DE = {
                      "flach ausgelegt zum Lasern.",
     "Waffel": "Körper → sich kreuzende Rippen mit Halbschlitzen, flach "
               "ausgelegt.",
+    "Rippen-Relief": "Stehende Rippen auf einer Grundplatte mit Schlitzen, "
+                     "zusammen eine 3D-Fläche — parallel oder radial, "
+                     "Höhe als Form oder Formel. Für Uhren und Paneele.",
     # 3D-Druck
     "Druck-Check": "Überhang in %, dünnste Wand, dicht? Überhänge rot.",
     "Auf Bett legen": "Größte ebene Fläche nach unten, mittig, z = 0.",

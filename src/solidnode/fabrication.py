@@ -509,6 +509,119 @@ def make_nodes(SerpNode, Tree, geo, is_shape, parse):
             off = -(hi - lo).max() - 30
             return ribs, layout_row(flats, abstand, y=off)
 
+    class RippenReliefNode(SerpNode):
+        """Stehende Rippen auf einer Grundplatte, zusammen eine 3D-Fläche."""
+        __identifier__ = "serp.Laser"
+        NODE_NAME = "Rippen-Relief"
+        INPUTS = [("umriss", "geo", None, False),
+                  ("groesse", "num", 280, False), ("abstand", "num", 7, False),
+                  ("anzahl", "int", 48, False), ("winkel", "num", 90, False),
+                  ("drall", "num", 0, False), ("staerke", "num", 3, False),
+                  ("hmin", "num", 4, False), ("hmax", "num", 40, False),
+                  ("fenster", "num", 0.35, False), ("fx", "num", 0, False),
+                  ("fy", "num", 0, False), ("wellen", "num", 2, False),
+                  ("spiel", "num", 0.1, False), ("loch", "num", 8, False)]
+        OPTIONAL = ("umriss",)
+        OUTPUTS = ["montiert", "flach", "info"]
+
+        def __init__(self):
+            super().__init__()
+            from . import rippen as R
+            self.add_combo_menu("form", "Form (ohne Umriss)", items=R.FORMEN)
+            self.add_combo_menu("richtung", "Rippen", items=["parallel",
+                                                             "radial"])
+            self.add_combo_menu("hoehe", "Höhe", items=R.HOEHEN)
+            self.add_text_input("formel", "Eigene Formel (t u v w)",
+                                text="(1-t)**0.7")
+
+        def outline_from(self, shape):
+            polys = []
+            for e in edges_of(shape):
+                pl = _edge_polyline(e, 0.05)
+                if pl is not None and len(pl) >= 2:
+                    polys.append([tuple(p[:2]) for p in pl])
+            loops = [np.array(p) for p in chain(polys) if len(p) > 3]
+            if not loops:
+                raise ValueError("Umriss ist keine geschlossene Kurve")
+            P = max(loops, key=lambda p: np.ptp(p, axis=0).prod())
+            return P[:-1] if np.allclose(P[0], P[-1]) else P
+
+        def compute(self, inputs):
+            from . import rippen as R
+            v = {k: next(inputs[k].items()) for k, *_ in self.INPUTS
+                 if k != "umriss"}
+            shapes = list(inputs["umriss"].items())
+            if shapes:
+                P = self.outline_from(shapes[0])
+            else:
+                P = R.form(self.get_property("form"), v["groesse"])
+            t = v["staerke"]
+            p = R.plan(P, richtung=self.get_property("richtung"),
+                       abstand=max(v["abstand"], t + 0.5),
+                       anzahl=v["anzahl"], winkel=v["winkel"],
+                       drall=v["drall"], staerke=t, hmin=v["hmin"],
+                       hmax=v["hmax"], fenster=v["fenster"], fx=v["fx"],
+                       fy=v["fy"], hoehe=self.get_property("hoehe"),
+                       wellen=v["wellen"], formel=self.get_property("formel"))
+            if not p["rippen"]:
+                raise ValueError("Keine Rippe passt — Abstand/Fenster prüfen")
+
+            def poly_face(pts):
+                return geo.planar_face(geo.make_polyline(
+                    [tuple(map(float, q)) for q in pts], closed=True))
+
+            # Grundplatte mit Schlitzen und Wellenloch, Oberseite z = 0
+            plate = poly_face([(x, y, 0.0) for x, y in p["outline"]])
+            w = t + v["spiel"]
+            cuts = []
+            for r in p["rippen"]:
+                d, n = r["d"], np.array([-r["d"][1], r["d"][0]])
+                for s0, s1 in r["zapfen"]:
+                    a, b = r["p0"] + d * (s0 - v["spiel"] / 2), \
+                        r["p0"] + d * (s1 + v["spiel"] / 2)
+                    cuts.append(poly_face([(*(a - n * w / 2), 0.0),
+                                           (*(b - n * w / 2), 0.0),
+                                           (*(b + n * w / 2), 0.0),
+                                           (*(a + n * w / 2), 0.0)]))
+            if v["loch"] > 0:
+                m, rl = p["mitte"], v["loch"] / 2
+                cuts.append(poly_face([
+                    (m[0] + rl * math.cos(a), m[1] + rl * math.sin(a), 0.0)
+                    for a in np.linspace(0, 2 * math.pi, 48, endpoint=False)]))
+            plate = geo.boolean_difference(plate, geo.make_compound(cuts))
+            montiert = [prism(plate, (0, 0, -t))]
+            fins_flat = []
+            for r in p["rippen"]:
+                d, n = r["d"], np.array([-r["d"][1], r["d"][0]])
+                base = r["p0"] - n * t / 2
+                pts3 = [(*(base + d * s), z) for s, z in r["profil"]]
+                montiert.append(prism(poly_face(pts3), (n[0] * t, n[1] * t, 0)))
+                fins_flat.append(poly_face([(s, z + t, 0.0)
+                                            for s, z in r["profil"]]))
+            # flach: Rippen in Reihen (in Reihenfolge = Einbaureihenfolge),
+            # darunter die Grundplatte
+            lo, hi = bbox(plate)
+            row_w = max(hi[0] - lo[0], 300.0)
+            flat, x, y, shelf = [], 0.0, 0.0, 0.0
+            for f in fins_flat:
+                flo, fhi = bbox(f)
+                fw, fh = fhi[0] - flo[0], fhi[1] - flo[1]
+                if x and x + fw > row_w:
+                    x, y, shelf = 0.0, y + shelf + 3, 0.0
+                flat.append(geo.translate(f, (x - flo[0], y - flo[1], 0)))
+                x += fw + 3
+                shelf = max(shelf, fh)
+            y += shelf + 10
+            flat.append(geo.translate(plate, (-lo[0], y - lo[1], 0)))
+            off = -(y + hi[1] - lo[1]) - 2 * (hi[0] - lo[0])
+            flat = [geo.translate(s, (lo[0], off, 0)) for s in flat]
+            hs = [r["hoehe"] for r in p["rippen"]]
+            info = (f"{len(hs)} Rippen · {sum(len(r['zapfen']) for r in p['rippen'])}"
+                    f" Schlitze · Höhe bis {max(hs):.1f} mm · "
+                    f"Mitte {p['mitte'][0]:.1f}/{p['mitte'][1]:.1f}")
+            return {"montiert": Tree({(0,): montiert}),
+                    "flach": Tree({(0,): flat}), "info": Tree.of(info)}
+
     # ======================================================= 3D-Druck
 
     class DruckCheckNode(SerpNode):
@@ -806,7 +919,7 @@ def make_nodes(SerpNode, Tree, geo, is_shape, parse):
     return [
         FingerzinkenNode, ZinkenBoxNode, LivingHingeNode, KerfNode,
         VerschachtelnNode, SvgExportNode, SchlitzeNode, KonturschnittNode,
-        WaffelNode,
+        WaffelNode, RippenReliefNode,
         DruckCheckNode, AufBettNode, ToleranzPaarNode, GitterNode, GyroidNode,
         GewindeNode, PraegenNode, MehrfarbNode,
     ]

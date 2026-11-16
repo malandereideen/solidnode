@@ -212,3 +212,33 @@ def test_update_version_compare_and_plan(monkeypatch, tmp_path):
     assert update.latest() is None
     what, prog, args, _cwd = update.plan()
     assert prog and args
+
+
+@pytest.mark.parametrize("richtung,hoehe", [("parallel", "Rand zum Fenster"),
+                                            ("radial", "Krater")])
+def test_rippen_relief_fits_plate(panel, richtung, hoehe):
+    from serpentine3d.core import geometry as geo
+    from solidnode.fabrication import bbox, is_null
+    g = panel.graph
+    panel.new()
+    node = g.create_node("serp.Laser.RippenReliefNode", pos=[0, 0])
+    node.set_property("richtung", richtung)
+    node.set_property("hoehe", hoehe)
+    if richtung == "radial":
+        node.set_property("in_drall", "20")
+    panel.evaluate()
+    assert not errors(panel)
+    parts = list(panel.cache[node.id]["montiert"].items())
+    plate, fins = parts[0], parts[1:]
+    assert len(fins) > 20
+    lo, hi = bbox(plate)
+    assert (hi - lo)[:2].max() == pytest.approx(280, abs=0.5)
+    assert hi[2] - lo[2] == pytest.approx(3)
+    for f in fins[::7]:                  # Zapfen sitzen frei im Schlitz
+        common = geo.boolean_intersection(plate, f)
+        assert is_null(common) or volume(common) < 1e-3
+        flo, fhi = bbox(f)
+        assert flo[2] == pytest.approx(-3)
+    flat = list(panel.cache[node.id]["flach"].items())
+    assert len(flat) == len(fins) + 1
+    assert all(bbox(s)[1][2] - bbox(s)[0][2] < 1e-6 for s in flat)
