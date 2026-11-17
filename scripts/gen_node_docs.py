@@ -69,7 +69,7 @@ EN = {
     "Schlitze": ("Slots", "Cross slots for slotted (waffle) assemblies."),
     "Konturschnitt": ("Contour slices", "Sections along an axis, laid out flat."),
     "Waffel": ("Waffle", "Body → interlocking ribs with half-slots, laid out flat."),
-    "Rippen-Relief": ("Rib relief", "Upright ribs slotted into a base plate form a 3D surface — parallel or radial, height as preset or formula. For clocks and panels."),
+    "Rippen-Relief": ("Rib relief", "Upright ribs slotted into a base plate form a 3D surface — parallel or radial, height as preset or formula. For clocks and panels; computes weight and centre of gravity and can shift the window or rotate the piece so it hangs straight."),
     "Druck-Check": ("Print check", "Overhang %, thinnest wall, watertight; overhangs shown red."),
     "Auf Bett legen": ("Place on bed", "Largest flat face down, centred, z = 0."),
     "Toleranz-Paar": ("Clearance pair", "Pin and hole with clearance."),

@@ -176,6 +176,96 @@ def zapfen(L, breite):
     return [(m - w / 2, m + w / 2) for m in mids]
 
 
+AUSGLEICH = ["aus", "Fenster seitlich", "Ganzes drehen"]
+
+
+def polygon_flaeche(P):
+    P = np.asarray(P, float)
+    x, y = P[:, 0], P[:, 1]
+    return (x * np.roll(y, -1) - np.roll(x, -1) * y).sum() / 2
+
+
+def schwerpunkt(p, staerke, *, dichte=0.75, werk_g=70.0, haken=20.0):
+    """Masse und Schwerpunkt (MDF, g/cm³) samt Uhrwerk an der Welle.
+
+    Der Aufhänger sitzt am Uhrwerk, ``haken`` mm über der Welle. Die Uhr
+    pendelt sich so ein, dass der Schwerpunkt senkrecht unter dem Haken
+    liegt; ``neigung`` ist der Winkel, um den sie dann schief hängt
+    (positiv = gegen den Uhrzeigersinn, von vorn gesehen).
+    """
+    rho = dichte / 1000.0                              # g/mm³
+    c = np.asarray(p["mitte"], float)
+    teile = []                                         # (masse, x, y, z)
+    A = abs(polygon_flaeche(p["outline"]))
+    gp = area_centroid(p["outline"])
+    teile.append((A * staerke * rho, gp[0], gp[1], -staerke / 2))
+    for r in p["rippen"]:
+        prof = np.asarray(r["profil"], float)
+        a = polygon_flaeche(prof)
+        if abs(a) < 1e-9:
+            continue
+        sc, zc = area_centroid(prof)
+        q = r["p0"] + r["d"] * sc
+        teile.append((abs(a) * staerke * rho, q[0], q[1], zc))
+    if werk_g > 0:
+        teile.append((werk_g, c[0], c[1], -staerke - 8.0))
+    T = np.array(teile)
+    m = T[:, 0].sum()
+    g = (T[:, 1:] * T[:, :1]).sum(0) / m
+    dx, dy = g[0] - c[0], g[1] - c[1]
+    neigung = -math.degrees(math.atan2(dx, haken - dy))
+    return dict(masse=float(m), punkt=g, dx=float(dx), dy=float(dy),
+                neigung=float(neigung), stabil=bool(dy < haken),
+                haken=c + np.array([0.0, haken]))
+
+
+def drehen(p, winkel_grad):
+    """Ganzen Plan starr um die Welle drehen."""
+    c = np.asarray(p["mitte"], float)
+    a = math.radians(winkel_grad)
+    M = np.array([[math.cos(a), -math.sin(a)], [math.sin(a), math.cos(a)]])
+
+    def rot(P):
+        P = np.asarray(P, float)
+        return (P - c) @ M.T + c if len(P) else P
+    q = dict(p, outline=rot(p["outline"]), window=rot(p["window"]))
+    q["rippen"] = [dict(r, p0=rot(r["p0"][None])[0], d=M @ r["d"])
+                   for r in p["rippen"]]
+    return q
+
+
+def ausgleichen(outline, modus, staerke, sp_args, **kw):
+    """Plan erzeugen und so korrigieren, dass die Uhr gerade hängt.
+
+    ``Fenster seitlich`` verschiebt Fenster samt Welle waagerecht, bis der
+    Schwerpunkt unter dem Haken liegt; ``Ganzes drehen`` dreht das fertige
+    Objekt um die Welle (die Zwölf bleibt oben, das Design steht schräg).
+    """
+    p = plan(outline, staerke=staerke, **kw)
+    sp = schwerpunkt(p, staerke, **sp_args)
+    if modus == "Fenster seitlich" and p["rippen"]:
+        fx0 = kw.pop("fx", 0.0)
+        x0, f0 = fx0, sp["dx"]
+        x1 = fx0 + f0
+        for _ in range(12):
+            q = plan(outline, staerke=staerke, fx=x1, **kw)
+            if not q["rippen"]:
+                break
+            s1 = schwerpunkt(q, staerke, **sp_args)
+            p, sp = q, s1
+            f1 = s1["dx"]
+            if abs(f1) < 0.05 or abs(f1 - f0) < 1e-9:
+                break
+            x0, x1, f0 = x1, x1 - f1 * (x1 - x0) / (f1 - f0), f1
+        p["fx"] = x1
+    elif modus == "Ganzes drehen" and p["rippen"]:
+        if math.hypot(sp["dx"], sp["dy"]) > 1e-6:   # Schwerpunkt unter Welle
+            a = math.degrees(math.atan2(sp["dy"], sp["dx"]))
+            p = drehen(p, -90.0 - a)
+            sp = schwerpunkt(p, staerke, **sp_args)
+    return p, sp
+
+
 def plan(outline, *, richtung="parallel", abstand=7.0, anzahl=48,
          winkel=0.0, drall=0.0, staerke=3.0, hmin=4.0, hmax=40.0,
          fenster=0.35, fx=0.0, fy=0.0, hoehe="Rand zum Fenster",

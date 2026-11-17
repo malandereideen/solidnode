@@ -520,9 +520,11 @@ def make_nodes(SerpNode, Tree, geo, is_shape, parse):
                   ("hmin", "num", 4, False), ("hmax", "num", 40, False),
                   ("fenster", "num", 0.35, False), ("fx", "num", 0, False),
                   ("fy", "num", 0, False), ("wellen", "num", 2, False),
-                  ("spiel", "num", 0.1, False), ("loch", "num", 8, False)]
+                  ("spiel", "num", 0.1, False), ("loch", "num", 8, False),
+                  ("werk_g", "num", 70, False), ("haken", "num", 20, False),
+                  ("dichte", "num", 0.75, False)]
         OPTIONAL = ("umriss",)
-        OUTPUTS = ["montiert", "flach", "info"]
+        OUTPUTS = ["montiert", "flach", "lot", "info"]
 
         def __init__(self):
             super().__init__()
@@ -533,6 +535,8 @@ def make_nodes(SerpNode, Tree, geo, is_shape, parse):
             self.add_combo_menu("hoehe", "Höhe", items=R.HOEHEN)
             self.add_text_input("formel", "Eigene Formel (t u v w)",
                                 text="(1-t)**0.7")
+            self.add_combo_menu("ausgleich", "Gerade hängen",
+                                items=R.AUSGLEICH)
 
         def outline_from(self, shape):
             polys = []
@@ -556,13 +560,17 @@ def make_nodes(SerpNode, Tree, geo, is_shape, parse):
             else:
                 P = R.form(self.get_property("form"), v["groesse"])
             t = v["staerke"]
-            p = R.plan(P, richtung=self.get_property("richtung"),
-                       abstand=max(v["abstand"], t + 0.5),
-                       anzahl=v["anzahl"], winkel=v["winkel"],
-                       drall=v["drall"], staerke=t, hmin=v["hmin"],
-                       hmax=v["hmax"], fenster=v["fenster"], fx=v["fx"],
-                       fy=v["fy"], hoehe=self.get_property("hoehe"),
-                       wellen=v["wellen"], formel=self.get_property("formel"))
+            p, sp = R.ausgleichen(
+                P, self.get_property("ausgleich") or "aus", t,
+                dict(dichte=v["dichte"], werk_g=v["werk_g"],
+                     haken=v["haken"]),
+                richtung=self.get_property("richtung"),
+                abstand=max(v["abstand"], t + 0.5),
+                anzahl=v["anzahl"], winkel=v["winkel"],
+                drall=v["drall"], hmin=v["hmin"],
+                hmax=v["hmax"], fenster=v["fenster"], fx=v["fx"],
+                fy=v["fy"], hoehe=self.get_property("hoehe"),
+                wellen=v["wellen"], formel=self.get_property("formel"))
             if not p["rippen"]:
                 raise ValueError("Keine Rippe passt — Abstand/Fenster prüfen")
 
@@ -616,11 +624,33 @@ def make_nodes(SerpNode, Tree, geo, is_shape, parse):
             off = -(y + hi[1] - lo[1]) - 2 * (hi[0] - lo[0])
             flat = [geo.translate(s, (lo[0], off, 0)) for s in flat]
             hs = [r["hoehe"] for r in p["rippen"]]
+            # Lot: Haken, senkrechte Linie nach unten, Kreuz am Schwerpunkt
+            zl = max(hs) + 2
+            hk, g = sp["haken"], sp["punkt"]
+            lot = [geo.make_polyline([(hk[0], hk[1], zl),
+                                      (hk[0], g[1] - 30, zl)]),
+                   geo.make_polyline([(g[0] - 8, g[1], zl),
+                                      (g[0] + 8, g[1], zl)]),
+                   geo.make_polyline([(g[0], g[1] - 8, zl),
+                                      (g[0], g[1] + 8, zl)]),
+                   geo.make_polyline([(hk[0] + 4 * math.cos(a),
+                                       hk[1] + 4 * math.sin(a), zl)
+                                      for a in np.linspace(0, 2 * math.pi, 25)])]
+            lage = ("hängt gerade" if abs(sp["neigung"]) < 0.5 else
+                    f"hängt {abs(sp['neigung']):.1f}° schief "
+                    f"({'rechts' if sp['neigung'] < 0 else 'links'} tiefer)")
+            if not sp["stabil"]:
+                lage = "Schwerpunkt über dem Haken — kippt, Fenster höher setzen"
             info = (f"{len(hs)} Rippen · {sum(len(r['zapfen']) for r in p['rippen'])}"
                     f" Schlitze · Höhe bis {max(hs):.1f} mm · "
-                    f"Mitte {p['mitte'][0]:.1f}/{p['mitte'][1]:.1f}")
+                    f"Mitte {p['mitte'][0]:.1f}/{p['mitte'][1]:.1f}\n"
+                    f"{sp['masse']:.0f} g · Schwerpunkt {sp['dx']:+.1f}/"
+                    f"{sp['dy']:+.1f} mm zur Welle · {lage}")
+            if "fx" in p:
+                info += f" · Fenster fx = {p['fx']:.1f}"
             return {"montiert": Tree({(0,): montiert}),
-                    "flach": Tree({(0,): flat}), "info": Tree.of(info)}
+                    "flach": Tree({(0,): flat}), "lot": Tree({(0,): lot}),
+                    "info": Tree.of(info)}
 
     # ======================================================= 3D-Druck
 

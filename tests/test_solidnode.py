@@ -242,3 +242,29 @@ def test_rippen_relief_fits_plate(panel, richtung, hoehe):
     flat = list(panel.cache[node.id]["flach"].items())
     assert len(flat) == len(fins) + 1
     assert all(bbox(s)[1][2] - bbox(s)[0][2] < 1e-6 for s in flat)
+
+
+@pytest.mark.parametrize("modus", ["Fenster seitlich", "Ganzes drehen"])
+def test_rippen_relief_haengt_gerade(modus):
+    from solidnode import rippen as R
+    P = R.form("Kiesel", 280)
+    kw = dict(winkel=90, fx=50, fy=-40, hmax=40)
+    _, schief = R.ausgleichen(P, "aus", 3.0, {}, **kw)
+    assert abs(schief["neigung"]) > 20
+    p, sp = R.ausgleichen(P, modus, 3.0, {}, **kw)
+    assert abs(sp["dx"]) < 0.2
+    assert len(p["rippen"]) > 20
+    if modus == "Ganzes drehen":
+        assert sp["stabil"] and abs(sp["neigung"]) < 0.2
+
+
+def test_rippen_relief_lot_ausgang(panel):
+    g = panel.graph
+    panel.new()
+    node = g.create_node("serp.Laser.RippenReliefNode", pos=[0, 0])
+    node.set_property("ausgleich", "Ganzes drehen")
+    panel.evaluate()
+    assert not errors(panel)
+    assert len(list(panel.cache[node.id]["lot"].items())) == 4
+    info = next(panel.cache[node.id]["info"].items())
+    assert "Schwerpunkt" in info and "hängt gerade" in info

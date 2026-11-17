@@ -81,7 +81,10 @@ DE = {
               "ausgelegt.",
     "Rippen-Relief": "Stehende Rippen auf einer Grundplatte mit Schlitzen, "
                      "zusammen eine 3D-Fläche — parallel oder radial, "
-                     "Höhe als Form oder Formel. Für Uhren und Paneele.",
+                     "Höhe als Form oder Formel. Für Uhren und Paneele. "
+                     "Rechnet Gewicht und Schwerpunkt samt Uhrwerk; "
+                     "„Gerade hängen“ schiebt das Fenster oder dreht "
+                     "das Ganze, bis der Schwerpunkt unter dem Haken liegt.",
     # 3D-Druck
     "Druck-Check": "Überhang in %, dünnste Wand, dicht? Überhänge rot.",
     "Auf Bett legen": "Größte ebene Fläche nach unten, mittig, z = 0.",
