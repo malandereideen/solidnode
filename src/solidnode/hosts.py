@@ -76,7 +76,7 @@ class Host:
     def show(self, chans, items):
         """chans None = Vorschau aus. items: [(name, geometrie)]."""
 
-    def bake(self, items) -> str:
+    def bake(self, items, what="Nodes") -> str:
         return "Dieses Ziel kann nicht baken"
 
     def fit(self, lo, hi):
@@ -176,8 +176,8 @@ class SerpentineHost(Host):
         for vp in self.window.all_viewports():
             vp.update()
 
-    def bake(self, items):
-        return add_to_scene(self.window, items)
+    def bake(self, items, what="Nodes"):
+        return add_to_scene(self.window, items, what)
 
     def fit(self, lo, hi):
         lo, hi = np.asarray(lo, float), np.asarray(hi, float)
@@ -329,7 +329,7 @@ class SerpentineRemote(Host):
         except Exception:                     # noqa: BLE001
             pass
 
-    def bake(self, items):
+    def bake(self, items, what="Nodes"):
         files = []
         for i, (name, item) in enumerate(items):
             files.append([name, write_shape(
@@ -558,10 +558,15 @@ class SolidCraftHost(Host):
         return ", ".join(parts) or "nichts"
 
     def _delete_preview(self, c):
-        try:
-            c.execute("component.delete", {"component": self.PREVIEW})
-        except RuntimeError:
-            pass                              # war noch keine da
+        """Alle Vorschau-Komponenten weg — per Nummer, denn der STEP-Import
+        legt darin eine gleichnamige Unterkomponente an, und beim Namen
+        verweigert SolidCraft dann das Löschen."""
+        comps = json.loads(c.execute("component.list",
+                                     {"compact": True}))["components"]
+        ids = {k["id"] for k in comps if k["name"] == self.PREVIEW}
+        for k in comps:
+            if k["id"] in ids and k["parent"] not in ids:
+                c.execute("component.delete", {"component": k["id"]})
 
     # -- Host
 
@@ -593,8 +598,8 @@ class SolidCraftHost(Host):
             return "SolidCraft: Vorschau entfernt"
         return self._job(job)
 
-    def bake(self, items):
-        name = f"Nodes {time.strftime('%H:%M:%S')}"
+    def bake(self, items, what="Nodes"):
+        name = f"{what} {time.strftime('%H:%M:%S')}"
         return self._job(lambda c: f"SolidCraft: „{name}“ · "
                          + self._place(c, items, name))
 

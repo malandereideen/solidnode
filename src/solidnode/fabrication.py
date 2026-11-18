@@ -526,6 +526,8 @@ def make_nodes(SerpNode, Tree, geo, is_shape, parse):
                   ("dichte", "num", 0.75, False)]
         OPTIONAL = ("umriss",)
         OUTPUTS = ["montiert", "flach", "lot", "info"]
+        PARTS_OUTPUTS = ("flach",)      # erst per Knopf „Einzelteile“
+        VIEW_OUTPUTS = ("lot",)         # Hilfslinie, nur in der Vorschau
 
         def __init__(self):
             super().__init__()

@@ -1648,6 +1648,7 @@ def make_core():
             for label, fn in (("Neu", self.new), ("Öffnen…", self.open),
                               ("Speichern…", self.save),
                               ("Bake", self.bake),
+                              ("Einzelteile", self.bake_parts),
                               ("Alles zeigen", self.fit)):
                 bar.addAction(label, fn)
             examples = QtWidgets.QToolButton()
@@ -1851,16 +1852,6 @@ def make_core():
                     out.append(node)
             return out
 
-        def preview_items(self):
-            for node in self.preview_nodes():
-                warn = getattr(node, "WARN_OUTPUTS", ())
-                for name, value in self.cache.get(node.id, {}).items():
-                    if value is None:
-                        continue
-                    for item in value.items():
-                        if is_point(item) or is_shape(item):
-                            yield node, item, name in warn
-
         def update_preview(self):
             import numpy as np
             if not self.preview_on:
@@ -1890,10 +1881,35 @@ def make_core():
                           for w in (False, True))
             self.host.show(chans, self.result_items())
 
+        def preview_items(self, skip=False):
+            for node in self.preview_nodes():
+                warn = getattr(node, "WARN_OUTPUTS", ())
+                hold = (getattr(node, "PARTS_OUTPUTS", ())
+                        + getattr(node, "VIEW_OUTPUTS", ())) if skip else ()
+                for name, value in self.cache.get(node.id, {}).items():
+                    if value is None or name in hold:
+                        continue
+                    for item in value.items():
+                        if is_point(item) or is_shape(item):
+                            yield node, item, name in warn
+
         def result_items(self):
-            """(Name, Geometrie) der Vorschau ohne Warnungen — fürs Ziel."""
+            """(Name, Geometrie) der Vorschau ohne Warnungen — fürs Ziel.
+            Einzelteile (PARTS_OUTPUTS) und Hilfslinien (VIEW_OUTPUTS)
+            bleiben draußen; die Einzelteile gibt es per Knopf."""
             return [(node.name(), item) for node, item, warn
-                    in self.preview_items() if not warn]
+                    in self.preview_items(skip=True) if not warn]
+
+        def parts_items(self):
+            """(Name, Geometrie) aller Einzelteil-Ausgänge im Graph."""
+            out = []
+            for node in self.order():
+                for name in getattr(node, "PARTS_OUTPUTS", ()):
+                    value = self.cache.get(node.id, {}).get(name)
+                    if value is not None:
+                        out += [(f"{node.name()} {name}", item)
+                                for item in value.items() if is_shape(item)]
+            return out
 
         def set_preview(self, on):
             self.preview_on = on
@@ -1911,6 +1927,18 @@ def make_core():
             except Exception as exc:            # noqa: BLE001
                 traceback.print_exc()
                 self.status.setText(f"Bake fehlgeschlagen: {exc}")
+
+        def bake_parts(self):
+            """Einzelteile (z. B. die flachen Rippen) erst auf Wunsch."""
+            items = self.parts_items()
+            if not items:
+                self.status.setText("Keine Einzelteile im Graph")
+                return
+            try:
+                self.status.setText(self.host.bake(items, "Einzelteile"))
+            except Exception as exc:            # noqa: BLE001
+                traceback.print_exc()
+                self.status.setText(f"Einzelteile fehlgeschlagen: {exc}")
 
         def delete_selected(self):
             self.graph.delete_nodes(self.graph.selected_nodes())

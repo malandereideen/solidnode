@@ -97,10 +97,10 @@ class Router(hosts.Host):
         except Exception as exc:              # noqa: BLE001
             self.report(f"{t.name}: {exc}")
 
-    def bake(self, items):
+    def bake(self, items, what="Nodes"):
         if self.target is None:
             return self.bake_file(items)
-        return self.target.bake(items)
+        return self.target.bake(items, what)
 
     def bake_file(self, items):
         path, _ = QtWidgets.QFileDialog.getSaveFileName(

@@ -28,7 +28,7 @@ class RecordingHost:
     def show(self, chans, items):
         self.chans, self.items = chans, items
 
-    def bake(self, items):
+    def bake(self, items, what="Nodes"):
         return f"{len(items)} baked"
 
     def fit(self, lo, hi):
@@ -268,6 +268,21 @@ def test_rippen_relief_lot_ausgang(panel):
     assert len(list(panel.cache[node.id]["lot"].items())) == 4
     info = next(panel.cache[node.id]["info"].items())
     assert "Schwerpunkt" in info and "hängt gerade" in info
+
+
+def test_rippen_relief_einzelteile_erst_per_knopf(panel):
+    g = panel.graph
+    panel.new()
+    node = g.create_node("serp.Laser.RippenReliefNode", pos=[0, 0])
+    panel.evaluate()
+    assert not errors(panel)
+    montiert = list(panel.cache[node.id]["montiert"].items())
+    flach = list(panel.cache[node.id]["flach"].items())
+    assert len(panel.result_items()) == len(montiert)   # ohne flach und Lot
+    assert len(panel.host.items) == len(montiert)
+    assert len(panel.parts_items()) == len(flach)
+    panel.bake_parts()
+    assert panel.status.text() == f"{len(flach)} baked"
 
 
 def test_palette_rubrik_relief_und_uhren():
