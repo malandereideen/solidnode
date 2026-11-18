@@ -114,7 +114,7 @@ def main():
            f"{len(classes)} nodes. Node and port names are German (as in the "
            "app); *list* means the input takes a whole branch at once.", ""]
     for ident, label, _color in panel_cls.CATEGORIES:
-        group = [c for c in classes if c.__identifier__ == ident]
+        group = [c for c in classes if panel_cls.palette_group(c) == ident]
         if not group:
             continue
         out += [f"## {label}", "", "| Node | English | Inputs | Outputs | Notes |",

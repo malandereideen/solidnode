@@ -268,3 +268,13 @@ def test_rippen_relief_lot_ausgang(panel):
     assert len(list(panel.cache[node.id]["lot"].items())) == 4
     info = next(panel.cache[node.id]["info"].items())
     assert "Schwerpunkt" in info and "hängt gerade" in info
+
+
+def test_palette_rubrik_relief_und_uhren():
+    from solidnode import core
+    panel_cls = core.make_core()
+    assert panel_cls.CATEGORIES[0][1] == "Relief & Uhren"
+    relief = [c for c in panel_cls.NODE_CLASSES
+              if panel_cls.palette_group(c) == "serp.Relief"]
+    assert [c.NODE_NAME for c in relief] == ["Rippen-Relief"]
+    assert relief[0].__identifier__ == "serp.Laser"   # alte Dateien laden

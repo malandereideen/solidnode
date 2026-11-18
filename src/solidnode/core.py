@@ -1391,6 +1391,7 @@ def make_core():
     # -------------------------------------------------------- Palette
 
     CATEGORIES = [
+        ("serp.Relief", "Relief & Uhren", "#f0b429"),
         ("serp.Parameter", "Parameter", "#5b8fd9"),
         ("serp.Mathe", "Mathe", "#9a7ad6"),
         ("serp.Listen", "Listen", "#c47cc0"),
@@ -1474,6 +1475,10 @@ def make_core():
         p.end()
         return QtGui.QIcon(pm)
 
+    def palette_group(cls):
+        """Rubrik in der Palette; PALETTE überschreibt den Datei-Bezeichner."""
+        return getattr(cls, "PALETTE", cls.__identifier__)
+
     class IconGrid(QtWidgets.QListWidget):
         """Kacheln einer Kategorie; ziehen = Node an die Stelle legen."""
 
@@ -1548,14 +1553,33 @@ def make_core():
             col.setSpacing(0)
             self.sections = []
             for ident, label, color in CATEGORIES:
-                classes = [c for c in NODE_CLASSES
-                           if c.__identifier__ == ident]
+                classes = [c for c in NODE_CLASSES if palette_group(c) == ident]
                 if not classes:
                     continue
                 head = QtWidgets.QLabel(label.upper())
                 head.setStyleSheet(
                     f"color: {color}; font-size: 9px; font-weight: bold;"
                     " padding: 6px 0 1px 2px; letter-spacing: 1px;")
+                if ident == "serp.Relief":
+                    # eigene Rubrik ganz oben, mit Startknopf für die Uhr
+                    head.setStyleSheet(
+                        f"color: {color}; font-size: 11px; font-weight: bold;"
+                        " padding: 4px 0 2px 2px; letter-spacing: 1px;")
+                    self.uhr_button = QtWidgets.QPushButton(
+                        "Neue Rippen-Uhr")
+                    self.uhr_button.setToolTip(
+                        "Lädt das Beispiel „rippen uhr“: Rippen-Relief mit "
+                        "Schwerpunkt-Ausgleich und SVG-Export.")
+                    self.uhr_button.setStyleSheet(
+                        f"QPushButton {{ background: {color}; color: #1d1f23;"
+                        " font-weight: bold; border: none; border-radius: 4px;"
+                        " padding: 6px; text-align: left; }"
+                        "QPushButton:hover { background: #f5c451; }")
+                    self.uhr_button.clicked.connect(self._uhr)
+                    col.addWidget(head)
+                    col.addWidget(self.uhr_button)
+                    head = QtWidgets.QWidget()   # Suche blendet beides aus
+                    head.setFixedHeight(0)
                 grid = IconGrid(graph)
                 for cls in classes:
                     it = QtWidgets.QListWidgetItem(node_icon(cls, color), "")
@@ -1580,12 +1604,25 @@ def make_core():
             for _h, grid, _c in self.sections:
                 grid.fit_height()
 
+        def _uhr(self):
+            panel = self.parent()
+            while panel is not None and not hasattr(panel, "load_and_fit"):
+                panel = panel.parent()
+            if panel is not None:
+                panel.load_and_fit(os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    "examples", "rippen_uhr.json"))
+
         def _filter(self, text):
             t = text.strip().lower()
+            if hasattr(self, "uhr_button"):
+                self.uhr_button.setVisible(
+                    not t or any(w in t for w in ("uhr", "rippe", "relief")))
             for head, grid, classes in self.sections:
                 shown = 0
                 for i, cls in enumerate(classes):
-                    hit = not t or t in cls.NODE_NAME.lower()
+                    hit = (not t or t in cls.NODE_NAME.lower()
+                           or t in nodeinfo.DE.get(cls.NODE_NAME, "").lower())
                     grid.item(i).setHidden(not hit)
                     shown += hit
                 head.setVisible(shown > 0)
@@ -1936,6 +1973,7 @@ def make_core():
 
     NodePanel.NODE_CLASSES = NODE_CLASSES
     NodePanel.CATEGORIES = CATEGORIES
+    NodePanel.palette_group = staticmethod(palette_group)
     return NodePanel
 
 

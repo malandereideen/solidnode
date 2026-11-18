@@ -2,6 +2,12 @@
 
 Generated from the code by `scripts/gen_node_docs.py` — 88 nodes. Node and port names are German (as in the app); *list* means the input takes a whole branch at once.
 
+## Relief & Uhren
+
+| Node | English | Inputs | Outputs | Notes |
+|---|---|---|---|---|
+| **Rippen-Relief** | Rib relief | `umriss` geometry<br>`groesse` number = 280<br>`abstand` number = 7<br>`anzahl` integer = 48<br>`winkel` number = 90<br>`drall` number = 0<br>`staerke` number = 3<br>`hmin` number = 4<br>`hmax` number = 40<br>`fenster` number = 0.35<br>`fx` number = 0<br>`fy` number = 0<br>`wellen` number = 2<br>`spiel` number = 0.1<br>`loch` number = 8<br>`werk_g` number = 70<br>`haken` number = 20<br>`dichte` number = 0.75 | `montiert`, `flach`, `lot`, `info` | Upright ribs slotted into a base plate form a 3D surface — parallel or radial, height as preset or formula. For clocks and panels; computes weight and centre of gravity and can shift the window or rotate the piece so it hangs straight. |
+
 ## Parameter
 
 | Node | English | Inputs | Outputs | Notes |
@@ -144,7 +150,6 @@ Generated from the code by `scripts/gen_node_docs.py` — 88 nodes. Node and por
 | **Schlitze** | Slots | `platte` geometry<br>`punkte` point *(list)*<br>`breite` number = 3<br>`tiefe` number = 20 | `platte` | Cross slots for slotted (waffle) assemblies. |
 | **Konturschnitt** | Contour slices | `koerper` geometry<br>`anzahl` integer = 8<br>`abstand` number = 5 | `schnitte`, `flach` | Sections along an axis, laid out flat. |
 | **Waffel** | Waffle | `koerper` geometry<br>`nx` integer = 4<br>`ny` integer = 4<br>`staerke` number = 3<br>`abstand` number = 5 | `montiert`, `flach` | Body → interlocking ribs with half-slots, laid out flat. |
-| **Rippen-Relief** | Rib relief | `umriss` geometry<br>`groesse` number = 280<br>`abstand` number = 7<br>`anzahl` integer = 48<br>`winkel` number = 90<br>`drall` number = 0<br>`staerke` number = 3<br>`hmin` number = 4<br>`hmax` number = 40<br>`fenster` number = 0.35<br>`fx` number = 0<br>`fy` number = 0<br>`wellen` number = 2<br>`spiel` number = 0.1<br>`loch` number = 8<br>`werk_g` number = 70<br>`haken` number = 20<br>`dichte` number = 0.75 | `montiert`, `flach`, `lot`, `info` | Upright ribs slotted into a base plate form a 3D surface — parallel or radial, height as preset or formula. For clocks and panels; computes weight and centre of gravity and can shift the window or rotate the piece so it hangs straight. |
 
 ## 3D-Druck
 

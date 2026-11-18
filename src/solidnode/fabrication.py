@@ -511,7 +511,8 @@ def make_nodes(SerpNode, Tree, geo, is_shape, parse):
 
     class RippenReliefNode(SerpNode):
         """Stehende Rippen auf einer Grundplatte, zusammen eine 3D-Fläche."""
-        __identifier__ = "serp.Laser"
+        __identifier__ = "serp.Laser"   # bleibt, sonst laden alte Dateien nicht
+        PALETTE = "serp.Relief"
         NODE_NAME = "Rippen-Relief"
         INPUTS = [("umriss", "geo", None, False),
                   ("groesse", "num", 280, False), ("abstand", "num", 7, False),
