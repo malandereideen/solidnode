@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Fingerzinken</title>
+  <path d="M6 12 L26 12 L26 20 L38 20 L38 28 L26 28 L26 36 L38 36 L38 44 L26 44 L26 52 L6 52 Z" fill="#e2e8ef" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M58 12 L26 12 L26 20 L38 20 L38 28 L26 28 L26 36 L38 36 L38 44 L26 44 L26 52 L58 52 Z" fill="#328bd3" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

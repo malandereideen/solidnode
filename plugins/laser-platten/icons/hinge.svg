@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Living Hinge</title>
+  <path d="M6 14 L58 14 L58 50 L6 50 Z" fill="#e2e8ef" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M15 22 L25 22 M29 22 L39 22 M43 22 L53 22 M10 27 L18 27 M22 27 L32 27 M36 27 L46 27 M50 27 L54 27 M15 32 L25 32 M29 32 L39 32 M43 32 L53 32 M10 37 L18 37 M22 37 L32 37 M36 37 L46 37 M50 37 L54 37 M15 42 L25 42 M29 42 L39 42 M43 42 L53 42" fill="none" stroke="#236ead" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

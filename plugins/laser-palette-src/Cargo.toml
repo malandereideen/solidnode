@@ -1,0 +1,19 @@
+[package]
+name = "laser-palette"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+serde_json = "1"
+geo = "0.33.1"
+wit-bindgen = "0.63"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

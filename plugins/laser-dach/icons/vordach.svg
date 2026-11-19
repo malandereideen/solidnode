@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>vordach</title>
+  <path d="M8 60 L8 6" fill="none" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M8 22 L54 32 L54 36 L8 26 Z" fill="#328bd3" stroke="#236ead" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M46 34 L46 60 M20 30 Q38 32 46 44" fill="none" stroke="#236ead" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

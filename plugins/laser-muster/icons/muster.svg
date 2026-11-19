@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Muster</title>
+  <path d="M6 6 L58 6 L58 58 L6 58 Z" fill="#e2e8ef" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6 17 L58 17 M6 28 L58 28 M6 39 L58 39 M6 50 L58 50 M20 6 L20 17 M44 6 L44 17 M32 17 L32 28 M56 17 L56 28 M8 17 L8 28 M20 28 L20 39 M44 28 L44 39 M32 39 L32 50 M8 39 L8 50 M56 39 L56 50 M20 50 L20 58 M44 50 L44 58" fill="none" stroke="#236ead" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

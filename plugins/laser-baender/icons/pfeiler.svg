@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Strebepfeiler</title>
+  <path d="M6 6 L30 6 L30 58 L6 58 Z" fill="#b8c3cf" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M30 58 L56 58 L56 34 L44 22 L44 12 L30 6 Z" fill="#328bd3" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

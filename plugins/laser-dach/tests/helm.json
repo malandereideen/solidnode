@@ -1,0 +1,19 @@
+{
+  "entry": "helm",
+  "params": {
+    "turm": [
+      {
+        "type": "body",
+        "name": "Turm Wand 3"
+      }
+    ]
+  },
+  "setup": "fixtures/turm_zinnen.json",
+  "expect": {
+    "model": {
+      "total": {
+        "volume_mm3": 57110.1
+      }
+    }
+  }
+}

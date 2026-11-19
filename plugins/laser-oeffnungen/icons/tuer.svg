@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Tür</title>
+  <path d="M6 6 L58 6 L58 58 L6 58 Z" fill="#b8c3cf" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M20.0 58.0 L44.0 58.0 L44.0 30.0 L43.8 27.7 L43.1 25.4 L42.0 23.3 L40.5 21.5 L38.7 20.0 L36.6 18.9 L34.3 18.2 L32.0 18.0 L29.7 18.2 L27.4 18.9 L25.3 20.0 L23.5 21.5 L22.0 23.3 L20.9 25.4 L20.2 27.7 L20.0 30.0 Z" fill="#328bd3" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M26 30 L26 58 M32 26 L32 58 M38 30 L38 58" fill="none" stroke="#34465b" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

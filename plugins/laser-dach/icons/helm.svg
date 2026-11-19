@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>helm</title>
+  <path d="M16 60 L16 34 L48 34 L48 60 Z" fill="#e2e8ef" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M12 34 L32 10 L52 34 Z" fill="#328bd3" stroke="#236ead" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M32 10 L32 2 M28 5 L36 5" fill="none" stroke="#236ead" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

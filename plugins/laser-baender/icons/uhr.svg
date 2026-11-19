@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Uhr</title>
+  <path d="M6 6 L58 6 L58 58 L6 58 Z" fill="#b8c3cf" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="22" fill="#328bd3" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M45.0 32.0 L49.0 32.0 M43.3 38.5 L46.7 40.5 M38.5 43.3 L40.5 46.7 M32.0 45.0 L32.0 49.0 M25.5 43.3 L23.5 46.7 M20.7 38.5 L17.3 40.5 M19.0 32.0 L15.0 32.0 M20.7 25.5 L17.3 23.5 M25.5 20.7 L23.5 17.3 M32.0 19.0 L32.0 15.0 M38.5 20.7 L40.5 17.3 M43.3 25.5 L46.7 23.5 M32 32 L32 20 M32 32 L41 37" fill="none" stroke="#e2e8ef" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

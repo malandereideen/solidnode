@@ -1,0 +1,25 @@
+{
+  "entry": "vordach",
+  "params": {
+    "wand": [
+      {
+        "type": "face",
+        "body": "Haus Front",
+        "index": 0,
+        "point": [
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "setup": "fixtures/haus_sattel.json",
+  "expect": {
+    "model": {
+      "total": {
+        "volume_mm3": 130888.4
+      }
+    }
+  }
+}

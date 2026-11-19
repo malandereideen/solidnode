@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>bogen</title>
+  <path d="M6 6 L58 6 L58 58 L6 58 Z" fill="#b8c3cf" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M21.0 50.0 L43.0 50.0 L43.0 27.0 L42.8 24.9 L42.2 22.8 L41.1 20.9 L39.8 19.2 L38.1 17.9 L36.2 16.8 L34.1 16.2 L32.0 16.0 L29.9 16.2 L27.8 16.8 L25.9 17.9 L24.2 19.2 L22.9 20.9 L21.8 22.8 L21.2 24.9 L21.0 27.0 Z" fill="#b9ddf8" stroke="#236ead" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M32 50 L32 16" fill="none" stroke="#236ead" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

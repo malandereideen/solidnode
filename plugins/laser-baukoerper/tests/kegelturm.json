@@ -1,0 +1,9 @@
+{
+ "entry": "kegelturm",
+ "params": {},
+ "expect": {
+  "model": {
+   "body_count": 3
+  }
+ }
+}

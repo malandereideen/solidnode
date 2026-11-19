@@ -1,0 +1,3 @@
+{"entry": "kasten",
+ "params": {"breite": 120, "tiefe": 80, "hoehe": 60, "staerke": 3, "deckel": true, "zinken": true, "zinke": 10},
+ "expect": {"model": {"body_count": 6, "total": {"volume_mm3": 120456}}}}

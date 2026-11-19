@@ -1,0 +1,9 @@
+{
+ "entry": "zeltturm",
+ "params": {},
+ "expect": {
+  "model": {
+   "body_count": 17
+  }
+ }
+}

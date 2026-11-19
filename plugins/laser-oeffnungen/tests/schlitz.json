@@ -1,0 +1,27 @@
+{
+ "entry": "schlitz",
+ "description": "schlitz auf Platte 100×3×60, Klick Mitte",
+ "params": {
+  "wand": [
+   {
+    "type": "face",
+    "body": "Body1",
+    "index": 3,
+    "point": [
+     50,
+     0,
+     30
+    ]
+   }
+  ]
+ },
+ "design": "wand.sc",
+ "expect": {
+  "model": {
+   "body_count": 1,
+   "total": {
+    "volume_mm3": 17958.0
+   }
+  }
+ }
+}

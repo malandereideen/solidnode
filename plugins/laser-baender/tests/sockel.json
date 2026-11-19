@@ -1,0 +1,27 @@
+{
+ "entry": "sockel",
+ "description": "sockel auf Kastenfront (Kasten 120×80×60)",
+ "params": {
+  "wand": [
+   {
+    "type": "face",
+    "body": "Kasten Front",
+    "index": 0,
+    "point": [
+     60,
+     0,
+     30
+    ]
+   }
+  ]
+ },
+ "design": "kasten.sc",
+ "expect": {
+  "model": {
+   "body_count": 9,
+   "total": {
+    "volume_mm3": 105744.0
+   }
+  }
+ }
+}

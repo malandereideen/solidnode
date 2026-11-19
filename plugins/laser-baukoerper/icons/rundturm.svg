@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Rundturm</title>
+  <path d="M20 26 L44 26 L44 54 A12 4 0 0 1 20 54 Z" fill="#e2e8ef" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M20 26 A12 4 0 0 0 44 26" fill="none" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M18.0 26.0 L18.0 14.0 L24.0 14.0 L24.0 20.0 L29.0 20.0 L29.0 14.0 L35.0 14.0 L35.0 20.0 L40.0 20.0 L40.0 14.0 L46.0 14.0 L46.0 26.0 Z" fill="#b8c3cf" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Sockel</title>
+  <path d="M6 6 L58 6 L58 58 L6 58 Z" fill="#b8c3cf" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M4 46 L60 46 L60 58 L4 58 Z" fill="#328bd3" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

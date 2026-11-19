@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Eckquader</title>
+  <path d="M6 6 L58 6 L58 58 L6 58 Z" fill="#b8c3cf" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6 9 L24 9 L24 17 L6 17 Z" fill="#328bd3" stroke="#34465b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6 20 L17 20 L17 28 L6 28 Z" fill="#328bd3" stroke="#34465b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6 31 L24 31 L24 39 L6 39 Z" fill="#328bd3" stroke="#34465b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6 42 L17 42 L17 50 L6 50 Z" fill="#328bd3" stroke="#34465b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M58 9 L47 9 L47 17 L58 17 Z" fill="#328bd3" stroke="#34465b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M58 20 L40 20 L40 28 L58 28 Z" fill="#328bd3" stroke="#34465b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M58 31 L47 31 L47 39 L58 39 Z" fill="#328bd3" stroke="#34465b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M58 42 L40 42 L40 50 L58 50 Z" fill="#328bd3" stroke="#34465b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

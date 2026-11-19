@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Fachwerkbrücke</title>
+  <path d="M4.0 20.0 L60.0 20.0 L60.0 46.0 L4.0 46.0 Z" fill="none" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M4.0 46.0 L18.0 20.0 L32.0 46.0 L46.0 20.0 L60.0 46.0" fill="none" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M18.0 20.0 L18.0 46.0" fill="none" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M32.0 20.0 L32.0 46.0" fill="none" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M46.0 20.0 L46.0 46.0" fill="none" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2.0 46.0 L62.0 46.0 L62.0 52.0 L2.0 52.0 Z" fill="#328bd3" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

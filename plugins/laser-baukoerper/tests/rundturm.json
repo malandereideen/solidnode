@@ -1,0 +1,9 @@
+{
+ "entry": "rundturm",
+ "params": {},
+ "expect": {
+  "model": {
+   "body_count": 3
+  }
+ }
+}

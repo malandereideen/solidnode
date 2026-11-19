@@ -1,0 +1,530 @@
+{
+  "id": "laser-dach",
+  "name": "Laser · Dach",
+  "version": "0.1.0",
+  "description": "Laserbausatz: Gaube, Zwerchgiebel, Dachreiter, Turmhelm, Schornstein, Vordach.",
+  "capabilities": [
+    "commands@0.1"
+  ],
+  "runtime": {
+    "module": "laser.wasm",
+    "commands": [
+      "document.inspect",
+      "inspect.measure",
+      "sketch.create",
+      "sketch.finish",
+      "sketch.line",
+      "sketch.rectangle.two_point",
+      "solid.extrude"
+    ],
+    "entries": [
+      {
+        "name": "gaube",
+        "effect": "edit",
+        "input_schema": {
+          "type": "object",
+          "x-solidcraft-icon": "icons/gaube.svg",
+          "title": "Gaube",
+          "description": "Dachfläche eines Hauses anklicken (vorn/hinten); „von links“ = Mitte der Gaube.",
+          "required": [
+            "dachflaeche"
+          ],
+          "properties": {
+            "dachflaeche": {
+              "type": "array",
+              "title": "Dachfläche",
+              "minItems": 1,
+              "maxItems": 1,
+              "x-solidcraft-selection": {
+                "version": 1,
+                "accept": [
+                  "face",
+                  "body"
+                ]
+              }
+            },
+            "x": {
+              "type": "number",
+              "title": "von links",
+              "default": 30,
+              "minimum": -2000,
+              "unit": "mm"
+            },
+            "breite": {
+              "type": "number",
+              "title": "Breite",
+              "default": 14,
+              "minimum": 6,
+              "unit": "mm"
+            },
+            "hoehe": {
+              "type": "number",
+              "title": "Höhe",
+              "default": 10,
+              "minimum": 3,
+              "unit": "mm"
+            },
+            "tiefe": {
+              "type": "number",
+              "title": "ab Traufe",
+              "default": 8,
+              "minimum": 0,
+              "unit": "mm"
+            },
+            "neigung": {
+              "type": "number",
+              "title": "Neigung",
+              "default": 45,
+              "minimum": 15,
+              "unit": "deg"
+            },
+            "fenster": {
+              "type": "boolean",
+              "title": "Fenster",
+              "default": true
+            },
+            "staerke": {
+              "type": "number",
+              "title": "Stärke",
+              "default": 3,
+              "minimum": 0.5,
+              "unit": "mm"
+            }
+          }
+        },
+        "slots": [
+          {
+            "kind": "ribbon",
+            "name": "Gaube"
+          },
+          {
+            "kind": "menu",
+            "name": "Gaube"
+          }
+        ]
+      },
+      {
+        "name": "zwerch",
+        "effect": "edit",
+        "input_schema": {
+          "type": "object",
+          "x-solidcraft-icon": "icons/zwerch.svg",
+          "title": "Zwerchgiebel",
+          "description": "Dachfläche eines Hauses anklicken; der Giebel steht in der Fassade.",
+          "required": [
+            "dachflaeche"
+          ],
+          "properties": {
+            "dachflaeche": {
+              "type": "array",
+              "title": "Dachfläche",
+              "minItems": 1,
+              "maxItems": 1,
+              "x-solidcraft-selection": {
+                "version": 1,
+                "accept": [
+                  "face",
+                  "body"
+                ]
+              }
+            },
+            "x": {
+              "type": "number",
+              "title": "von links",
+              "default": 50,
+              "minimum": -2000,
+              "unit": "mm"
+            },
+            "breite": {
+              "type": "number",
+              "title": "Breite",
+              "default": 30,
+              "minimum": 8,
+              "unit": "mm"
+            },
+            "kniestock": {
+              "type": "number",
+              "title": "Kniestock",
+              "default": 12,
+              "minimum": 3,
+              "unit": "mm"
+            },
+            "neigung": {
+              "type": "number",
+              "title": "Neigung",
+              "default": 45,
+              "minimum": 15,
+              "unit": "deg"
+            },
+            "fenster": {
+              "type": "boolean",
+              "title": "Fenster",
+              "default": true
+            },
+            "staerke": {
+              "type": "number",
+              "title": "Stärke",
+              "default": 3,
+              "minimum": 0.5,
+              "unit": "mm"
+            }
+          }
+        },
+        "slots": [
+          {
+            "kind": "ribbon",
+            "name": "Zwerch"
+          },
+          {
+            "kind": "menu",
+            "name": "Zwerchgiebel"
+          }
+        ]
+      },
+      {
+        "name": "dachreiter",
+        "effect": "edit",
+        "input_schema": {
+          "type": "object",
+          "x-solidcraft-icon": "icons/dachreiter.svg",
+          "title": "Dachreiter",
+          "description": "Haus mit Satteldach anklicken.",
+          "required": [
+            "haus"
+          ],
+          "properties": {
+            "haus": {
+              "type": "array",
+              "title": "Haus",
+              "minItems": 1,
+              "maxItems": 1,
+              "x-solidcraft-selection": {
+                "version": 1,
+                "accept": [
+                  "face",
+                  "body"
+                ]
+              }
+            },
+            "x": {
+              "type": "number",
+              "title": "von links",
+              "default": 50,
+              "minimum": -2000,
+              "unit": "mm"
+            },
+            "breite": {
+              "type": "number",
+              "title": "Breite",
+              "default": 14,
+              "minimum": 6,
+              "unit": "mm"
+            },
+            "tiefe": {
+              "type": "number",
+              "title": "Tiefe",
+              "default": 14,
+              "minimum": 6,
+              "unit": "mm"
+            },
+            "hoehe": {
+              "type": "number",
+              "title": "über First",
+              "default": 14,
+              "minimum": 3,
+              "unit": "mm"
+            },
+            "neigung": {
+              "type": "number",
+              "title": "Neigung",
+              "default": 70,
+              "minimum": 20,
+              "unit": "deg"
+            },
+            "ueberstand": {
+              "type": "number",
+              "title": "Überstand",
+              "default": 1.5,
+              "minimum": 0,
+              "unit": "mm"
+            },
+            "kreuz": {
+              "type": "boolean",
+              "title": "Kreuz",
+              "default": true
+            },
+            "kreuz_h": {
+              "type": "number",
+              "title": "Kreuzhöhe",
+              "default": 8,
+              "minimum": 3,
+              "unit": "mm"
+            },
+            "staerke": {
+              "type": "number",
+              "title": "Stärke",
+              "default": 3,
+              "minimum": 0.5,
+              "unit": "mm"
+            }
+          }
+        },
+        "slots": [
+          {
+            "kind": "ribbon",
+            "name": "Reiter"
+          },
+          {
+            "kind": "menu",
+            "name": "Dachreiter"
+          }
+        ]
+      },
+      {
+        "name": "helm",
+        "effect": "edit",
+        "input_schema": {
+          "type": "object",
+          "x-solidcraft-icon": "icons/helm.svg",
+          "title": "Turmhelm",
+          "description": "Turm anklicken (dort Dach „flach“ oder „zinnen“).",
+          "required": [
+            "turm"
+          ],
+          "properties": {
+            "turm": {
+              "type": "array",
+              "title": "Turm",
+              "minItems": 1,
+              "maxItems": 1,
+              "x-solidcraft-selection": {
+                "version": 1,
+                "accept": [
+                  "face",
+                  "body"
+                ]
+              }
+            },
+            "hoehe": {
+              "type": "number",
+              "title": "Höhe",
+              "default": 50,
+              "minimum": 5,
+              "unit": "mm"
+            },
+            "ueberstand": {
+              "type": "number",
+              "title": "Überstand",
+              "default": 2,
+              "minimum": 0,
+              "unit": "mm"
+            },
+            "kreuz": {
+              "type": "boolean",
+              "title": "Kreuz",
+              "default": true
+            },
+            "kreuz_h": {
+              "type": "number",
+              "title": "Kreuzhöhe",
+              "default": 12,
+              "minimum": 3,
+              "unit": "mm"
+            },
+            "staerke": {
+              "type": "number",
+              "title": "Stärke",
+              "default": 3,
+              "minimum": 0.5,
+              "unit": "mm"
+            }
+          }
+        },
+        "slots": [
+          {
+            "kind": "ribbon",
+            "name": "Helm"
+          },
+          {
+            "kind": "menu",
+            "name": "Turmhelm"
+          }
+        ]
+      },
+      {
+        "name": "kamin",
+        "effect": "edit",
+        "input_schema": {
+          "type": "object",
+          "x-solidcraft-icon": "icons/kamin.svg",
+          "title": "Schornstein",
+          "description": "Haus anklicken.",
+          "required": [
+            "haus"
+          ],
+          "properties": {
+            "haus": {
+              "type": "array",
+              "title": "Haus",
+              "minItems": 1,
+              "maxItems": 1,
+              "x-solidcraft-selection": {
+                "version": 1,
+                "accept": [
+                  "face",
+                  "body"
+                ]
+              }
+            },
+            "x": {
+              "type": "number",
+              "title": "von links",
+              "default": 20,
+              "minimum": -2000,
+              "unit": "mm"
+            },
+            "y": {
+              "type": "number",
+              "title": "vor First",
+              "default": 10,
+              "minimum": -2000,
+              "unit": "mm"
+            },
+            "breite": {
+              "type": "number",
+              "title": "Breite",
+              "default": 10,
+              "minimum": 4,
+              "unit": "mm"
+            },
+            "tiefe": {
+              "type": "number",
+              "title": "Tiefe",
+              "default": 10,
+              "minimum": 4,
+              "unit": "mm"
+            },
+            "hoehe": {
+              "type": "number",
+              "title": "über First",
+              "default": 10,
+              "minimum": 0,
+              "unit": "mm"
+            },
+            "staerke": {
+              "type": "number",
+              "title": "Stärke",
+              "default": 3,
+              "minimum": 0.5,
+              "unit": "mm"
+            }
+          }
+        },
+        "slots": [
+          {
+            "kind": "ribbon",
+            "name": "Kamin"
+          },
+          {
+            "kind": "menu",
+            "name": "Schornstein"
+          }
+        ]
+      },
+      {
+        "name": "vordach",
+        "effect": "edit",
+        "input_schema": {
+          "type": "object",
+          "x-solidcraft-icon": "icons/vordach.svg",
+          "title": "Vordach",
+          "description": "Wandfläche anklicken (Klickpunkt = Mitte); „Höhe ab“ = Anschluss über der Wandunterkante.",
+          "required": [
+            "wand"
+          ],
+          "properties": {
+            "wand": {
+              "type": "array",
+              "title": "Wand",
+              "minItems": 1,
+              "maxItems": 1,
+              "x-solidcraft-selection": {
+                "version": 1,
+                "accept": [
+                  "face"
+                ]
+              }
+            },
+            "x": {
+              "type": "number",
+              "title": "← →",
+              "default": 0,
+              "minimum": -2000,
+              "unit": "mm"
+            },
+            "z": {
+              "type": "number",
+              "title": "Höhe ab",
+              "default": 30,
+              "minimum": 3,
+              "unit": "mm"
+            },
+            "breite": {
+              "type": "number",
+              "title": "Breite",
+              "default": 40,
+              "minimum": 10,
+              "unit": "mm"
+            },
+            "tiefe": {
+              "type": "number",
+              "title": "Tiefe",
+              "default": 20,
+              "minimum": 5,
+              "unit": "mm"
+            },
+            "neigung": {
+              "type": "number",
+              "title": "Neigung",
+              "default": 12,
+              "minimum": 0,
+              "unit": "deg"
+            },
+            "stuetzen": {
+              "type": "boolean",
+              "title": "Stützen",
+              "default": true
+            },
+            "volant": {
+              "type": "boolean",
+              "title": "Volant",
+              "default": true
+            },
+            "staerke": {
+              "type": "number",
+              "title": "Stärke",
+              "default": 3,
+              "minimum": 0.5,
+              "unit": "mm"
+            }
+          }
+        },
+        "slots": [
+          {
+            "kind": "ribbon",
+            "name": "Vordach"
+          },
+          {
+            "kind": "menu",
+            "name": "Vordach"
+          }
+        ]
+      }
+    ],
+    "limits": {
+      "fuel": 5000000000,
+      "memory_mib": 32,
+      "deadline_ms": 20000
+    }
+  }
+}

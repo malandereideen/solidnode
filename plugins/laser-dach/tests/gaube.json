@@ -1,0 +1,25 @@
+{
+  "entry": "gaube",
+  "params": {
+    "dachflaeche": [
+      {
+        "type": "face",
+        "body": "Haus Dach vorn",
+        "index": 0,
+        "point": [
+          50,
+          10,
+          70
+        ]
+      }
+    ]
+  },
+  "setup": "fixtures/haus_sattel.json",
+  "expect": {
+    "model": {
+      "total": {
+        "volume_mm3": 128828.0
+      }
+    }
+  }
+}

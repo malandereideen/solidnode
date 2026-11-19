@@ -1,0 +1,19 @@
+{
+  "entry": "dachreiter",
+  "params": {
+    "haus": [
+      {
+        "type": "body",
+        "name": "Haus Front"
+      }
+    ]
+  },
+  "setup": "fixtures/haus_sattel.json",
+  "expect": {
+    "model": {
+      "total": {
+        "volume_mm3": 131715.4
+      }
+    }
+  }
+}

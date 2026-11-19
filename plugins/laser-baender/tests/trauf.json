@@ -1,0 +1,28 @@
+{
+ "entry": "trauf",
+ "description": "trauf auf Kastenfront (Kasten 120×80×60)",
+ "params": {
+  "rundum": true,
+  "wand": [
+   {
+    "type": "face",
+    "body": "Kasten Front",
+    "index": 0,
+    "point": [
+     60,
+     0,
+     30
+    ]
+   }
+  ]
+ },
+ "design": "kasten.sc",
+ "expect": {
+  "model": {
+   "body_count": 9,
+   "total": {
+    "volume_mm3": 104508.0
+   }
+  }
+ }
+}

@@ -1,0 +1,148 @@
+{
+  "id": "laser-platten",
+  "name": "Laser · Platten",
+  "version": "0.1.0",
+  "description": "Laserbausatz: Verbindungen an Platten.",
+  "capabilities": [
+    "commands@0.1"
+  ],
+  "runtime": {
+    "module": "laser.wasm",
+    "commands": [
+      "inspect.measure",
+      "sketch.create",
+      "sketch.finish",
+      "sketch.inspect",
+      "sketch.rectangle.two_point",
+      "solid.extrude"
+    ],
+    "entries": [
+      {
+        "name": "zinken",
+        "effect": "edit",
+        "input_schema": {
+          "type": "object",
+          "x-solidcraft-icon": "icons/zinken.svg",
+          "title": "Fingerzinken",
+          "description": "Schneidet Fingerzinken an allen Stößen der gewählten Platten (achsparallel, rechtwinklig, überlappend).",
+          "required": [
+            "platten"
+          ],
+          "properties": {
+            "platten": {
+              "type": "array",
+              "title": "Platten",
+              "minItems": 2,
+              "x-solidcraft-selection": {
+                "version": 1,
+                "accept": [
+                  "body"
+                ]
+              }
+            },
+            "zinke": {
+              "type": "number",
+              "title": "Zinkenbreite",
+              "default": 10,
+              "minimum": 2,
+              "unit": "mm"
+            }
+          }
+        },
+        "slots": [
+          {
+            "kind": "ribbon",
+            "name": "Zinken"
+          },
+          {
+            "kind": "menu",
+            "name": "Zinken"
+          }
+        ]
+      },
+      {
+        "name": "hinge",
+        "effect": "edit",
+        "input_schema": {
+          "type": "object",
+          "x-solidcraft-icon": "icons/hinge.svg",
+          "title": "Living Hinge",
+          "description": "Biegelinie (oder mehrere Linien als Rechteck) auf die Platte skizzieren und auswählen.",
+          "required": [
+            "linie"
+          ],
+          "properties": {
+            "linie": {
+              "type": "array",
+              "title": "Biegelinie",
+              "minItems": 1,
+              "x-solidcraft-selection": {
+                "version": 1,
+                "accept": [
+                  "sketch_curve"
+                ]
+              }
+            },
+            "radius": {
+              "type": "number",
+              "title": "Radius",
+              "default": 15,
+              "minimum": 1,
+              "unit": "mm"
+            },
+            "winkel": {
+              "type": "number",
+              "title": "Winkel",
+              "default": 90,
+              "minimum": 5,
+              "unit": "deg"
+            },
+            "schnitt": {
+              "type": "number",
+              "title": "Schnitt",
+              "default": 15,
+              "minimum": 3,
+              "unit": "mm"
+            },
+            "steg": {
+              "type": "number",
+              "title": "Steg",
+              "default": 3,
+              "minimum": 1,
+              "unit": "mm"
+            },
+            "abstand": {
+              "type": "number",
+              "title": "Abstand",
+              "default": 1.5,
+              "minimum": 0.5,
+              "unit": "mm"
+            },
+            "schlitz": {
+              "type": "number",
+              "title": "Schlitz",
+              "default": 0.5,
+              "minimum": 0.1,
+              "unit": "mm"
+            }
+          }
+        },
+        "slots": [
+          {
+            "kind": "ribbon",
+            "name": "Hinge"
+          },
+          {
+            "kind": "menu",
+            "name": "Living Hinge"
+          }
+        ]
+      }
+    ],
+    "limits": {
+      "fuel": 2000000000,
+      "memory_mib": 32,
+      "deadline_ms": 10000
+    }
+  }
+}

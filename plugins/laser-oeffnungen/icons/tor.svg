@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Tor</title>
+  <path d="M6 6 L58 6 L58 58 L6 58 Z" fill="#b8c3cf" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M15.0 58.0 L49.0 58.0 L49.0 31.0 L48.7 27.7 L47.7 24.5 L46.1 21.6 L44.0 19.0 L41.4 16.9 L38.5 15.3 L35.3 14.3 L32.0 14.0 L28.7 14.3 L25.5 15.3 L22.6 16.9 L20.0 19.0 L17.9 21.6 L16.3 24.5 L15.3 27.7 L15.0 31.0 Z" fill="#b9ddf8" stroke="#236ead" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

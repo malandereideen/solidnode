@@ -1,0 +1,9 @@
+{
+ "entry": "burghaus",
+ "params": {},
+ "expect": {
+  "model": {
+   "body_count": 6
+  }
+ }
+}

@@ -1,0 +1,19 @@
+{
+  "entry": "kamin",
+  "params": {
+    "haus": [
+      {
+        "type": "body",
+        "name": "Haus Front"
+      }
+    ]
+  },
+  "setup": "fixtures/haus_sattel.json",
+  "expect": {
+    "model": {
+      "total": {
+        "volume_mm3": 130492.9
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Kegelturm</title>
+  <path d="M20 26 L44 26 L44 54 A12 4 0 0 1 20 54 Z" fill="#e2e8ef" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M20 26 A12 4 0 0 0 44 26" fill="none" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M16.0 28.0 L32.0 4.0 L48.0 28.0 Z" fill="#8e9faf" stroke="#34465b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

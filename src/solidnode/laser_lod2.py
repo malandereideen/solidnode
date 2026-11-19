@@ -151,11 +151,15 @@ def _analyse(parts, ang):
             if len(g) >= 3:
                 n, a = _normal(g)
                 rn.append((n, a, min(q[2] for q in g), max(q[2] for q in g)))
-        slopes = [r for r in rn if abs(r[0][2]) < math.cos(math.radians(8))]
+        slopes = [r for r in rn if math.cos(math.radians(80)) < abs(r[0][2])
+                  < math.cos(math.radians(8))]   # keine Senkrechten
         rz = [q[2] for g in roofs for q in g]
         osm_ = not roofs and p.get("eave") is not None
         top = max(rz) if rz else (p["top"] if osm_ else z0 + (p.get("h") or 10))
-        eave = (min(r[2] for r in slopes) if slopes else
+        # Traufe: unterste Dachkante — aber Dachflächen, die bis fast zum
+        # Boden reichen (Artefakte, Durchfahrten), zählen nicht mit.
+        hoch = [r for r in slopes if r[2] >= z0 + 0.25 * (top - z0)]
+        eave = (min(r[2] for r in (hoch or slopes)) if slopes else
                 (p["eave"] if osm_ else top))
         typ = ROOF.get(str(p.get("roofType") or "")) or (
             "flach" if not slopes else "pult" if len(slopes) == 1 else
